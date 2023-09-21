@@ -1,7 +1,8 @@
 use lombok::AllArgsConstructor;
 use serde::Serialize;
 
-use crate::dto::input::structure_properties::LineType;
+use crate::models::styles::structure_display_properties::LineType;
+
 
 #[derive(Serialize, AllArgsConstructor, Clone)]
 pub struct Curve {

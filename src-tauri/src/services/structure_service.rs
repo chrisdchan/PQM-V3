@@ -15,10 +15,10 @@ use crate::{
         spline_dto::{SplineDtoRaw, SplineDtoWithDeriv},
         structure_dto::StructureDto,
     },
-    models::core::{
+    models::{core::{
         spline::Spline,
         structure::{Metric, Structure},
-    },
+    }, styles::structure_display_properties::StructureDisplayProperties},
     state::AppState,
     transformers::path_buf_transformer,
     utils::{asserts::assert_result_msg, math::relative_eq},
@@ -194,6 +194,7 @@ pub fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structur
         structure_dto.file_name,
         structure_dto.metric,
         splines,
+        StructureDisplayProperties::default()
     ))
 }
 

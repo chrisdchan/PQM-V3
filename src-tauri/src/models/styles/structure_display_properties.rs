@@ -1,7 +1,7 @@
 use lombok::Getter;
 use serde::Serialize;
 
-#[derive(Debug, Getter)]
+#[derive(Debug, Getter, Clone)]
 pub struct StructureDisplayProperties {
     line_type: LineType,
     start: f32,

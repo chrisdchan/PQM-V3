@@ -1,8 +1,8 @@
-use lombok::Builder;
+use lombok::{Builder, AllArgsConstructor};
 use serde::Serialize;
 use std::sync::{mpsc::RecvError, PoisonError};
 
-use crate::models::core::graph::Graph;
+use uuid::Uuid;
 
 use self::graph_response::GraphResponse;
 
@@ -10,7 +10,7 @@ pub mod curve;
 pub mod graph_response;
 pub mod structure_response;
 
-#[derive(Serialize, Debug, thiserror::Error, Clone)]
+#[derive(Serialize, Debug, thiserror::Error, Clone, AllArgsConstructor)]
 #[error("Response Error")]
 pub struct ResponseError {
     msg: String,
@@ -42,10 +42,12 @@ impl From<RecvError> for ResponseError {
 
 #[derive(Serialize, Builder)]
 pub struct SelectFilesResponse {
-    graph_response: GraphResponse,
+    graph_id: String,
 }
 
 #[derive(Serialize, Builder)]
 pub struct SelectFolderResponse {
-    graph_response: GraphResponse,
+    graph_id: String,
+    errored: bool,
+    failed_structures: Vec<String>,
 }

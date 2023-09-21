@@ -1,20 +1,18 @@
 use anyhow::Result;
 
 use crate::{
-    dto::{
-        input::structure_properties::{LineType, StructureDisplayProperties},
-        response::{
-            curve::{Curve, Line, Point},
-            structure_response::StructureResponse,
-        },
+    dto::response::{
+        curve::{Curve, Line, Point},
+        structure_response::StructureResponse,
     },
-    models::core::structure::Structure,
+    models::{
+        core::structure::Structure,
+        styles::structure_display_properties::{LineType, StructureDisplayProperties},
+    },
 };
 
-pub fn to_structure_response(
-    structure: &Structure,
-    display_properties: &StructureDisplayProperties,
-) -> Result<StructureResponse> {
+pub fn to_structure_response(structure: &Structure) -> Result<StructureResponse> {
+    let display_properties: &StructureDisplayProperties = structure.get_display_properties();
     let dx: f32 = (display_properties.get_end() - display_properties.get_start())
         / *display_properties.get_resolution() as f32;
 

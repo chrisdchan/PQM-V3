@@ -1,12 +1,19 @@
 'use client'
 
 import {invoke} from '@tauri-apps/api/tauri'
+import { useRouter } from 'next/navigation'
+
 
 export default function SelectFiles() {
 
-    const handleSelectFiles = () => {
-        invoke('select_files')
-        .then(console.log)
+    const router = useRouter();
+
+    const handleSelectFiles = async () => {
+
+        let graphResponse: JSON = await invoke('select_files')
+        console.log(graphResponse);
+        
+        router.push('/graph/1234');
     }
 
     return (

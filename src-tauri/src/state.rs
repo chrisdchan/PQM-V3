@@ -5,6 +5,7 @@ use std::{
 
 use crate::models::core::graph::Graph;
 
+#[derive(Debug)]
 pub struct AppState {
     pub current_graph: Option<Graph>,
 }

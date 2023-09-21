@@ -5,12 +5,11 @@ use std::{
 
 use crate::{
     dto::{
-        input::structure_properties::StructureDisplayProperties,
         response::{structure_response::StructureResponse, ResponseError},
     },
     services::structure_service,
     state::AppState,
-    transformers::structure_transformer,
+    transformers::structure_transformer, models::styles::structure_display_properties::StructureDisplayProperties,
 };
 
 pub fn create_structure(
@@ -20,6 +19,6 @@ pub fn create_structure(
 ) -> Result<StructureResponse, ResponseError> {
     let structure = structure_service::create_structure(path_buf)?;
     let structure_response =
-        structure_transformer::to_structure_response(&structure, display_properties)?;
+        structure_transformer::to_structure_response(&structure)?;
     Ok(structure_response)
 }

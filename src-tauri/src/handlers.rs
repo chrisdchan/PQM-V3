@@ -10,21 +10,32 @@ use tauri::{
     api::dialog::{self, FileDialogBuilder},
     State,
 };
-use tokio::sync::oneshot;
 
 use crate::{
     controllers::graph_controller,
     dto::response::{
-        graph_response::GraphResponse, ResponseError, SelectFilesResponse, SelectFolderResponse,
+        graph_response::GraphResponse, structure_response::StructureResponse, ResponseError,
+        SelectFilesResponse, SelectFolderResponse,
     },
     models::core::structure::{self, Metric, Structure},
     services::{csv_service, structure_service},
     state::AppState,
+    transformers::structure_transformer,
 };
 
 #[tauri::command]
-pub fn select_files() -> Result<SelectFilesResponse, ResponseError> {
-    let mut state: Arc<Mutex<AppState>> = Arc::new(Mutex::new(AppState::default()));
+pub fn get_graph(
+    app_state_mutex: State<Mutex<AppState>>,
+    graph_id: String,
+) -> Result<GraphResponse, ResponseError> {
+    let graph_response = graph_controller::get_graph(&app_state_mutex, &graph_id)?;
+    Ok(graph_response)
+}
+
+#[tauri::command]
+pub fn select_files(
+    app_state_mutex: State<Mutex<AppState>>,
+) -> Result<SelectFilesResponse, ResponseError> {
     let (sender, reciever) = std::sync::mpsc::channel();
     FileDialogBuilder::new().pick_files(move |file_paths| {
         let sender_clone = sender.clone();
@@ -34,16 +45,15 @@ pub fn select_files() -> Result<SelectFilesResponse, ResponseError> {
         });
     });
 
-    let mut graph_response = GraphResponse::default();
+    let mut select_files_res = SelectFilesResponse::builder();
 
-    if let Some(path_bufs) = reciever.recv()? {
-        graph_response = graph_controller::create_graph(Arc::clone(&state), path_bufs)?;
+    select_files_res.graph_id("graph id".to_owned());
+
+    if let Ok(Some(path_bufs)) = reciever.recv() {
+        graph_controller::create_graph(&app_state_mutex, path_bufs)?;
     }
 
-    let select_files_res = SelectFilesResponse::builder()
-        .graph_response(graph_response)
-        .build();
-    Ok(select_files_res)
+    Ok(select_files_res.build())
 }
 
 // #[tauri::command]

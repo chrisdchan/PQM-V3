@@ -2,6 +2,8 @@ use anyhow::{anyhow, Result};
 use lombok::{AllArgsConstructor, Builder, Getter, Setter};
 use serde::{Deserialize, Serialize};
 
+use crate::models::styles::structure_display_properties::StructureDisplayProperties;
+
 use super::spline::Spline;
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
@@ -11,12 +13,13 @@ pub enum Metric {
     SpecificAbsorbanceRate,
 }
 
-#[derive(Serialize, Deserialize, AllArgsConstructor, Getter, Setter, Clone, Debug)]
+#[derive(AllArgsConstructor, Getter, Setter, Clone, Debug)]
 pub struct Structure {
     name: String,
     file_name: String,
     metric: Metric,
     splines: Vec<Spline>,
+    display_properties: StructureDisplayProperties,
 }
 
 impl Structure {
@@ -31,7 +34,6 @@ impl Structure {
         let mut mid_ind = n / 2;
         let mut start = 0;
         let mut end = n;
-
 
         let mut spline = self
             .splines
@@ -94,6 +96,7 @@ mod tests {
             "file name".to_owned(),
             Metric::CurrentDensity,
             splines.clone(),
+            StructureDisplayProperties::default()
         )
     }
 
