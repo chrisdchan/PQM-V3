@@ -3,7 +3,7 @@ use std::{
     sync::{Arc, Mutex, RwLock},
 };
 
-use crate::models::core::graph::Graph;
+use crate::models::graph::Graph;
 
 #[derive(Debug)]
 pub struct AppState {

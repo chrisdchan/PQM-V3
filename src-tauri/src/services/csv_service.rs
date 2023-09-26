@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Error, Result};
 use std::{any, path::PathBuf, vec};
 
-use crate::{dto::structure_dto::StructureDto, models::core::structure::Metric};
+use crate::{dto::structure_dto::StructureDto, models::structure::Metric};
 
 pub fn read_csv(file_path: &PathBuf) -> Result<String> {
     println!("Processing {:?}", file_path);

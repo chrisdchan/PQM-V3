@@ -1,24 +1,25 @@
 use anyhow::{anyhow, Result};
 use std::{
     char::MAX,
+    cmp,
     collections::{HashMap, HashSet},
     iter::{self, zip},
     path::PathBuf,
     sync::{Arc, Mutex},
 };
 use tauri::State;
-
-use serde::__private::de;
+use uuid::Uuid;
 
 use crate::{
     dto::{
+        api::{StructureDisplayProperties, StructureDisplayStyle},
         spline_dto::{SplineDtoRaw, SplineDtoWithDeriv},
         structure_dto::StructureDto,
     },
-    models::{core::{
+    models::{
         spline::Spline,
-        structure::{Metric, Structure},
-    }, styles::structure_display_properties::StructureDisplayProperties},
+        structure::{self, Metric, Structure},
+    },
     state::AppState,
     transformers::path_buf_transformer,
     utils::{asserts::assert_result_msg, math::relative_eq},
@@ -190,12 +191,39 @@ pub fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structur
         .collect();
 
     Ok(Structure::new(
+        Uuid::new_v4(),
         structure_dto.name,
         structure_dto.file_name,
         structure_dto.metric,
         splines,
-        StructureDisplayProperties::default()
+        StructureDisplayProperties::default(),
+        StructureDisplayStyle::default(),
     ))
+}
+
+fn normalize_structure_dto(structure_dto: &StructureDto) -> Result<StructureDto> {
+    let max_y_val = structure_dto
+        .splines
+        .iter()
+        .fold(f32::NEG_INFINITY, |acc, e| {
+            f32::max(f32::max(e.y1, e.y2), acc)
+        });
+
+    let new_splines = structure_dto
+        .splines
+        .iter()
+        .map(|spline| {
+            let mut new_spline = spline.clone();
+            new_spline.y1 /= max_y_val;
+            new_spline.y2 /= max_y_val;
+            new_spline
+        })
+        .collect();
+
+    let mut new_structure_dto = structure_dto.clone();
+    new_structure_dto.splines = new_splines;
+
+    Ok(new_structure_dto.clone())
 }
 
 fn convert_raw_to_with_delta(spline_raw: &SplineDtoRaw) -> f32 {
@@ -209,7 +237,7 @@ fn get_derivative_guesses(deltas: Vec<f32>) -> Vec<SplineDtoWithDeriv> {
     derivative_guesses[0][0] = deltas[0] * 0.5;
     derivative_guesses[n - 1][1] = deltas[n - 1] * 0.5;
 
-    for (index, spline_dto) in deltas.iter().take(n - 1).skip(1).enumerate() {
+    for (index, _spline_dto) in deltas.iter().take(n - 1).skip(1).enumerate() {
         let d = (deltas[index] + deltas[index + 1]) * 0.5;
         derivative_guesses[index][1] = d;
         derivative_guesses[index + 1][0] = d;
@@ -311,9 +339,28 @@ fn spline_dto_to_spline(
 
 #[cfg(test)]
 mod tests {
+    use serde::forward_to_deserialize_any;
+
     use crate::dto::structure_dto;
 
     use super::*;
+
+    fn generate_struture_dto() -> StructureDto {
+        let name = "name".to_string();
+        let file_name = "file_name".to_string();
+        let frequency = 10000.;
+        let metric = Metric::CurrentDensity;
+        let splines = vec![
+            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
+            SplineDtoRaw::new(0.0, 99.0, 0.1, 97.0),
+            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
+            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
+            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
+            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
+            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
+        ];
+        StructureDto::new(name, file_name, frequency, metric, splines)
+    }
 
     #[test]
     fn test_create_structure_dto() {
@@ -392,4 +439,9 @@ mod tests {
         assert_eq!(expected_x, actual_x);
         assert_eq!(expected_y, actual_y);
     }
+
+    #[test]
+    fn test_normalize_structure_dto() {
+    }
+
 }

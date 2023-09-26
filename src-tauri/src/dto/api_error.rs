@@ -1,14 +1,7 @@
-use lombok::{Builder, AllArgsConstructor};
+use std::sync::{PoisonError, mpsc::RecvError};
+
+use lombok::AllArgsConstructor;
 use serde::Serialize;
-use std::sync::{mpsc::RecvError, PoisonError};
-
-use uuid::Uuid;
-
-use self::graph_response::GraphResponse;
-
-pub mod curve;
-pub mod graph_response;
-pub mod structure_response;
 
 #[derive(Serialize, Debug, thiserror::Error, Clone, AllArgsConstructor)]
 #[error("Response Error")]
@@ -38,16 +31,4 @@ impl From<RecvError> for ResponseError {
             msg: value.to_string(),
         }
     }
-}
-
-#[derive(Serialize, Builder)]
-pub struct SelectFilesResponse {
-    graph_id: String,
-}
-
-#[derive(Serialize, Builder)]
-pub struct SelectFolderResponse {
-    graph_id: String,
-    errored: bool,
-    failed_structures: Vec<String>,
 }

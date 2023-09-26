@@ -13,21 +13,17 @@ use tauri::{
 
 use crate::{
     controllers::graph_controller,
-    dto::response::{
-        graph_response::GraphResponse, structure_response::StructureResponse, ResponseError,
-        SelectFilesResponse, SelectFolderResponse,
-    },
-    models::core::structure::{self, Metric, Structure},
+    models::structure::{self, Metric, Structure},
     services::{csv_service, structure_service},
     state::AppState,
-    transformers::structure_transformer,
+    transformers::structure_transformer, dto::{api::GraphDisplay, api_error::ResponseError},
 };
 
 #[tauri::command]
 pub fn get_graph(
     app_state_mutex: State<Mutex<AppState>>,
     graph_id: String,
-) -> Result<GraphResponse, ResponseError> {
+) -> Result<GraphDisplay, ResponseError> {
     let graph_response = graph_controller::get_graph(&app_state_mutex, &graph_id)?;
     Ok(graph_response)
 }
@@ -35,7 +31,7 @@ pub fn get_graph(
 #[tauri::command]
 pub fn select_files(
     app_state_mutex: State<Mutex<AppState>>,
-) -> Result<SelectFilesResponse, ResponseError> {
+) -> Result<GraphDisplay, ResponseError> {
     let (sender, reciever) = std::sync::mpsc::channel();
     FileDialogBuilder::new().pick_files(move |file_paths| {
         let sender_clone = sender.clone();
@@ -45,15 +41,12 @@ pub fn select_files(
         });
     });
 
-    let mut select_files_res = SelectFilesResponse::builder();
-
-    select_files_res.graph_id("graph id".to_owned());
-
     if let Ok(Some(path_bufs)) = reciever.recv() {
-        graph_controller::create_graph(&app_state_mutex, path_bufs)?;
-    }
-
-    Ok(select_files_res.build())
+        let graph_display = graph_controller::create_graph(&app_state_mutex, path_bufs)?;
+        return Ok(graph_display);
+    } else {
+        return Err(ResponseError::new("Unable to detect file selection".to_string()));
+    } 
 }
 
 // #[tauri::command]

@@ -1,22 +1,20 @@
 use anyhow::Result;
+use uuid::Uuid;
 
 use crate::{
-    dto::response::{
-        curve::{Curve, Line, Point},
-        structure_response::StructureResponse,
-    },
-    models::{
-        core::structure::Structure,
-        styles::structure_display_properties::{LineType, StructureDisplayProperties},
-    },
+    dto::api::{Curve, Line, Point, StructureDisplay, StructureDisplayProperties},
+    models::structure::Structure,
 };
 
-pub fn to_structure_response(structure: &Structure) -> Result<StructureResponse> {
+pub fn to_structure_display(
+    structure: &Structure,
+    start: f32,
+    end: f32,
+) -> Result<StructureDisplay> {
     let display_properties: &StructureDisplayProperties = structure.get_display_properties();
-    let dx: f32 = (display_properties.get_end() - display_properties.get_start())
-        / *display_properties.get_resolution() as f32;
+    let dx: f32 = (end - start) / *display_properties.get_resolution() as f32;
 
-    let mut x1 = display_properties.get_end().to_owned();
+    let mut x1 = end;
     let mut x2 = x1 + dx;
     let mut y1;
     let mut y2;
@@ -35,7 +33,12 @@ pub fn to_structure_response(structure: &Structure) -> Result<StructureResponse>
         x2 = x2 + dx;
     }
 
-    let curve = Curve::new(lines, LineType::Solid);
-    let structure_response = StructureResponse::new(structure.get_file_name().to_string(), curve);
-    Ok(structure_response)
+    let curve = Curve::new(lines);
+    let structure_display = StructureDisplay::new(
+        structure.get_id().to_string(),
+        curve,
+        structure.get_display_properties().clone(),
+        structure.get_style().clone(),
+    );
+    Ok(structure_display)
 }

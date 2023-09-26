@@ -1,8 +1,9 @@
 use anyhow::{anyhow, Result};
 use lombok::{AllArgsConstructor, Builder, Getter, Setter};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-use crate::models::styles::structure_display_properties::StructureDisplayProperties;
+use crate::dto::api::{StructureDisplayProperties, StructureDisplayStyle};
 
 use super::spline::Spline;
 
@@ -15,11 +16,13 @@ pub enum Metric {
 
 #[derive(AllArgsConstructor, Getter, Setter, Clone, Debug)]
 pub struct Structure {
+    id: Uuid,
     name: String,
     file_name: String,
     metric: Metric,
     splines: Vec<Spline>,
     display_properties: StructureDisplayProperties,
+    style: StructureDisplayStyle,
 }
 
 impl Structure {
@@ -92,11 +95,13 @@ mod tests {
             Spline::new(10., y1, 14., y2, a, b, c, d),
         ];
         Structure::new(
+            Uuid::new_v4(),
             "name".to_owned(),
             "file name".to_owned(),
             Metric::CurrentDensity,
             splines.clone(),
-            StructureDisplayProperties::default()
+            StructureDisplayProperties::default(),
+            StructureDisplayStyle::default(),
         )
     }
 

@@ -1,29 +1,20 @@
-import { useCallback, useEffect, useState } from "react";
-import { GraphContext } from "../types/graphContext";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Graphics, Stage } from "@inlet/react-pixi";
 import * as PIXI from 'pixi.js'
-import { GraphResponse } from "../types/response/graphResponse";
+import { GraphDisplay } from "../types/api";
+import { drawGraph } from "../util/drawUtil";
 
 interface GraphProps {
-    graph: GraphResponse | null;
+    graph: GraphDisplay | null;
 }
 
 const Graph: React.FC<GraphProps> = ({graph}) => {
+    const graphicsRef = useRef<PIXI.Graphics | null>(null);
     const [windowDimensions, setWindowDimensions] = useState({
         width: window.innerWidth,
         height: window.innerHeight,
     });
 
-    const draw = (g: PIXI.Graphics) => {
-    g.clear();
-    g.beginFill(0xff0000);
-    g.drawRect(0, 0, 100, 100);
-    g.endFill();
-    }
-
-    useEffect(() => {
-        draw
-    }, [graph])
 
     useEffect(() => {
         const handleResize = () => {
@@ -40,6 +31,12 @@ const Graph: React.FC<GraphProps> = ({graph}) => {
         }
     }, []);
 
+    useEffect(() => {
+        if(graphicsRef.current) {
+            drawGraph(graphicsRef.current, graph);
+        }
+    }, [graph, windowDimensions])
+
     // Set the desired percentage of the window size
     const stageWidthPercentage = 0.8; // 80%
     const stageHeightPercentage = 0.8; // 80%
@@ -49,7 +46,7 @@ const Graph: React.FC<GraphProps> = ({graph}) => {
 
     return(
             <Stage width={stageWidth} height={stageHeight}>
-                <Graphics draw={draw}/>
+                <Graphics ref={graphicsRef}/>
             </Stage>
     );
 }

@@ -1,2 +1,3 @@
-pub mod core;
-pub mod styles;
+pub mod graph;
+pub mod spline;
+pub mod structure;
