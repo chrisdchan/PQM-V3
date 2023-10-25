@@ -14,7 +14,7 @@ pub fn to_structure_display(
     let display_properties: &StructureDisplayProperties = structure.get_display_properties();
     let dx: f32 = (end - start) / *display_properties.get_resolution() as f32;
 
-    let mut x1 = end;
+    let mut x1 = start;
     let mut x2 = x1 + dx;
     let mut y1;
     let mut y2;

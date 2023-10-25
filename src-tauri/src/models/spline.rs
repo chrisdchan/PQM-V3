@@ -25,7 +25,8 @@ impl Spline {
         if x < self.x1 || self.x2 < x {
             return Err(anyhow!("Input {} out of bounds on spline {:?}", x, self));
         }
-        Ok(3.2)
+        let y = self.a * x.powi(3) + self.b * x.powi(2) + self.c * x + self.d;
+        Ok(y)
     }
 
     pub fn in_domain(&self, x: f32) -> bool {

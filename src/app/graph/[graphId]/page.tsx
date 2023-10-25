@@ -13,13 +13,11 @@ const GraphPage = () => {
 
     const getCurrentGraph = async () => {
         try {
-            console.log("Calling get_graph");
-            
-            const graphResponse: GraphDisplay = await invoke('get_graph', {
+            const graphDisplay: GraphDisplay = await invoke('get_graph', {
                 graphId: "graph_id"
-            })
-            console.log(graphResponse);
-            setCurrentGraph(graphResponse)
+            });
+            
+            setCurrentGraph(graphDisplay)
         } catch(err) {
             setCurrentGraph(null)
             console.log(err);
@@ -32,7 +30,9 @@ const GraphPage = () => {
 
     return (
         <div>
-            <Graph graph={currentGraph}/>
+            <div className="w-32 h-32">
+                <Graph graph={currentGraph} />
+            </div>
             <button onClick={() => router.back()}>back</button>
         </div>
     )

@@ -2,25 +2,32 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Graphics, Stage } from "@inlet/react-pixi";
 import * as PIXI from 'pixi.js'
 import { GraphDisplay } from "../types/api";
-import { drawGraph } from "../util/drawUtil";
+import { drawGraph } from "../util/drawGraphUtil";
+import { drawFigure } from "../util/drawFigureUtil";
 
 interface GraphProps {
     graph: GraphDisplay | null;
 }
 
+export type WindowDimensions =  {
+    height: number,
+    width: number
+}
+
 const Graph: React.FC<GraphProps> = ({graph}) => {
-    const graphicsRef = useRef<PIXI.Graphics | null>(null);
-    const [windowDimensions, setWindowDimensions] = useState({
+    const foregroundGraphicsRef = useRef<PIXI.Graphics | null>(null);
+    const backgrounGrapcisRef = useRef<PIXI.Graphics | null>(null);
+
+    const [windowDimensions, setWindowDimensions] = useState<WindowDimensions>({
         width: window.innerWidth,
         height: window.innerHeight,
     });
 
-
     useEffect(() => {
         const handleResize = () => {
             setWindowDimensions({
-                width: window.innerWidth,
-                height: window.innerHeight
+                width: window.innerWidth * 0.8,
+                height: window.innerHeight * 0.8
             })
         };
         
@@ -32,22 +39,30 @@ const Graph: React.FC<GraphProps> = ({graph}) => {
     }, []);
 
     useEffect(() => {
-        if(graphicsRef.current) {
-            drawGraph(graphicsRef.current, graph);
+        if(backgrounGrapcisRef.current && foregroundGraphicsRef.current) {
+            if(graph){
+                drawFigure(
+                    backgrounGrapcisRef.current,
+                    foregroundGraphicsRef.current,
+                    windowDimensions, 
+                    graph)
+            }
         }
     }, [graph, windowDimensions])
 
-    // Set the desired percentage of the window size
-    const stageWidthPercentage = 0.8; // 80%
-    const stageHeightPercentage = 0.8; // 80%
 
-    const stageWidth = windowDimensions.width * stageWidthPercentage;
-    const stageHeight = windowDimensions.height * stageHeightPercentage;
+    const backgroundColorStr = graph?.graphDisplayStyle.outerColor as string
+    const backgroundColor = parseInt(backgroundColorStr, 16);
 
     return(
-            <Stage width={stageWidth} height={stageHeight}>
-                <Graphics ref={graphicsRef}/>
-            </Stage>
+        <Stage 
+            width={windowDimensions.width} 
+            height={windowDimensions.height}
+            options={{backgroundColor: 0xAAFFFF }}
+            >
+            <Graphics ref={foregroundGraphicsRef}/>
+            <Graphics ref={backgrounGrapcisRef}/>
+        </Stage>
     );
 }
 

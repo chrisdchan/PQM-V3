@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use lombok::{AllArgsConstructor};
 
 use crate::models::structure::Metric;

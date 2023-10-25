@@ -64,10 +64,10 @@ impl Default for StructureDisplayStyle {
 
 impl Default for Margin {
     fn default() -> Self {
-        let left = 0.0;
-        let right = 0.0;
-        let top = 0.0;
-        let bottom = 0.0;
+        let left = 0.2;
+        let right = 0.2;
+        let top = 0.2;
+        let bottom = 0.2;
         Self::new(left, right, top, bottom)
     }
 }
@@ -94,7 +94,7 @@ impl Default for AxisStyle {
 
 impl Default for LineStyle {
     fn default() -> Self {
-        let width = 1.0;
+        let width = 3.0;
         let color = "0x000000".to_string();
         Self::new(width, color)
     }

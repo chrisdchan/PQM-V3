@@ -1,8 +1,19 @@
+export type ModelDisplay = {
+    id: string,
+
+}
+
 export type GraphDisplay = {
     id: string,
     structures: StructureDisplay[],
     graphDisplayProperties: GraphDisplayProperties,
     graphDisplayStyle: GraphDisplayStyle,
+}
+
+export enum GraphType {
+    CURRENT_DENSITY,
+    E_FIELD,
+    SAR
 }
 
 export type StructureDisplay = {

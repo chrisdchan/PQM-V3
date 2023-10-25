@@ -176,10 +176,11 @@ fn parse_y_str(y_cell_str: &str) -> Result<f32> {
 }
 
 pub fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structure> {
-    let raw_splines = structure_dto.splines;
+    let normalized_structure_dto = normalize_structure_dto(&structure_dto)?;
+    let raw_splines = normalized_structure_dto.splines;
     let deltas = raw_splines.iter().map(convert_raw_to_with_delta).collect();
     let splines_with_initial_guess = get_derivative_guesses(deltas);
-    let derivatives = splines_with_initial_guess
+    let derivatives: Vec<SplineDtoWithDeriv> = splines_with_initial_guess
         .iter()
         .map(map_guess_to_f2_area)
         .collect();
@@ -214,16 +215,21 @@ fn normalize_structure_dto(structure_dto: &StructureDto) -> Result<StructureDto>
         .iter()
         .map(|spline| {
             let mut new_spline = spline.clone();
-            new_spline.y1 /= max_y_val;
-            new_spline.y2 /= max_y_val;
+            new_spline.y1 *= 100. / max_y_val;
+            new_spline.y2 *= 100. / max_y_val;
             new_spline
         })
         .collect();
 
-    let mut new_structure_dto = structure_dto.clone();
-    new_structure_dto.splines = new_splines;
+    let new_structure_dto = StructureDto::new(
+        structure_dto.name.clone(),
+        structure_dto.file_name.clone(),
+        structure_dto.frequency,
+        structure_dto.metric,
+        new_splines,
+    );
 
-    Ok(new_structure_dto.clone())
+    Ok(new_structure_dto)
 }
 
 fn convert_raw_to_with_delta(spline_raw: &SplineDtoRaw) -> f32 {
@@ -255,20 +261,18 @@ fn get_derivative_guesses(deltas: Vec<f32>) -> Vec<SplineDtoWithDeriv> {
 }
 
 fn map_guess_to_f2_area(initial_guess: &SplineDtoWithDeriv) -> SplineDtoWithDeriv {
-    let alpha;
-    let beta;
     const MAX_RADIUS: f32 = 9.0;
-
-    if relative_eq(initial_guess.delta, 0.0) {
-        alpha = 0.0;
-        beta = 0.0;
-    } else {
-        alpha = initial_guess.left_deriv / initial_guess.delta;
-        beta = initial_guess.right_deriv / initial_guess.delta;
-    }
 
     let mut left_deriv = initial_guess.left_deriv;
     let mut right_deriv = initial_guess.right_deriv;
+
+    if relative_eq(initial_guess.delta, 0.0) {
+        left_deriv = 0.0;
+        right_deriv = 0.0;
+    }
+
+    let alpha = left_deriv / initial_guess.delta;
+    let beta = right_deriv / initial_guess.delta;
 
     let solution_radius: f32 = alpha.powi(2) + beta.powi(2);
 
@@ -310,7 +314,6 @@ fn spline_dto_to_spline(
     let h = spline_dto_raw.x2 - spline_dto_raw.x1;
 
     let a = (spline_dto_deriv.left_deriv + spline_dto_deriv.right_deriv - 2. * delta) / h.powi(2);
-    let a = (spline_dto_deriv.left_deriv + spline_dto_deriv.right_deriv - 2. * delta) / h.powi(2);
     let b = (-2. * spline_dto_deriv.left_deriv - spline_dto_deriv.right_deriv + 3. * delta) / h;
     let c = spline_dto_deriv.left_deriv;
     let d = spline_dto_raw.y1;
@@ -321,19 +324,15 @@ fn spline_dto_to_spline(
     let l =
         -a * spline_dto_raw.x1.powi(3) + b * spline_dto_raw.x1.powi(2) - c * spline_dto_raw.x1 + d;
 
-    let point1 = (spline_dto_raw.x1, spline_dto_raw.y1);
-    let point2 = (spline_dto_raw.x2, spline_dto_raw.y2);
-    let coefficients = (i, j, k, l);
-
     Spline::new(
         spline_dto_raw.x1,
         spline_dto_raw.y1,
         spline_dto_raw.x2,
         spline_dto_raw.y2,
-        a,
-        b,
-        c,
-        d,
+        i,
+        j,
+        k,
+        l,
     )
 }
 
@@ -352,12 +351,12 @@ mod tests {
         let metric = Metric::CurrentDensity;
         let splines = vec![
             SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
-            SplineDtoRaw::new(0.0, 99.0, 0.1, 97.0),
-            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
-            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
-            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
-            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
-            SplineDtoRaw::new(0.0, 100.0, 0.1, 99.0),
+            SplineDtoRaw::new(0.1, 99.0, 1.0, 97.0),
+            SplineDtoRaw::new(1.0, 97.0, 2.0, 95.0),
+            SplineDtoRaw::new(2.0, 95.0, 5.0, 8.0),
+            SplineDtoRaw::new(5.0, 80.0, 10.0, 30.0),
+            SplineDtoRaw::new(10.0, 30.0, 12.0, 0.5),
+            SplineDtoRaw::new(12.0, 0.5, 50.0, 0.2),
         ];
         StructureDto::new(name, file_name, frequency, metric, splines)
     }
@@ -442,6 +441,20 @@ mod tests {
 
     #[test]
     fn test_normalize_structure_dto() {
-    }
+        // arrange
+        let structure_dto = generate_struture_dto();
 
+        // act
+        let new_structure_dto = normalize_structure_dto(&structure_dto).unwrap();
+
+        // assert
+        for spline_dto_raw in new_structure_dto.splines.iter() {
+            let y1 = spline_dto_raw.y1;
+            let y2 = spline_dto_raw.y2;
+            assert!(y1 >= 0.);
+            assert!(y1 <= 1.);
+            assert!(y2 >= 0.);
+            assert!(y2 <= 1.);
+        }
+    }
 }
