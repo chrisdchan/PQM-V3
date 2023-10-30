@@ -1,6 +1,7 @@
+
+
 export type ModelDisplay = {
     id: string,
-
 }
 
 export type GraphDisplay = {
@@ -106,4 +107,11 @@ export type Line = {
 export type Point = {
     x: number,
     y: number,
+}
+
+export type StructureTable = {
+    structureName: string,
+    volume: number,
+    areaMap: Record<string, number>,
+    cc: number
 }

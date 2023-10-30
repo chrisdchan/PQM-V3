@@ -1,13 +1,10 @@
 use anyhow::{anyhow, Result};
 use std::{
-    char::MAX,
-    cmp,
     collections::{HashMap, HashSet},
     iter::{self, zip},
     path::PathBuf,
     sync::{Arc, Mutex},
 };
-use tauri::State;
 use uuid::Uuid;
 
 use crate::{
@@ -18,9 +15,8 @@ use crate::{
     },
     models::{
         spline::Spline,
-        structure::{self, Metric, Structure},
+        structure::{Metric, Structure},
     },
-    state::AppState,
     transformers::path_buf_transformer,
     utils::{asserts::assert_result_msg, math::relative_eq},
 };
@@ -75,7 +71,7 @@ fn get_name(file_name: &str) -> String {
     file_name_parts.join(" ")
 }
 
-pub fn create_structure_dto(file_name: String, csv_string: String) -> Result<StructureDto> {
+fn create_structure_dto(file_name: String, csv_string: String) -> Result<StructureDto> {
     let lines: Vec<&str> = csv_string
         .split(LINE_SPLITTER)
         .into_iter()
@@ -175,7 +171,7 @@ fn parse_y_str(y_cell_str: &str) -> Result<f32> {
     Ok(y)
 }
 
-pub fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structure> {
+fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structure> {
     let normalized_structure_dto = normalize_structure_dto(&structure_dto)?;
     let raw_splines = normalized_structure_dto.splines;
     let deltas = raw_splines.iter().map(convert_raw_to_with_delta).collect();
@@ -335,7 +331,6 @@ fn spline_dto_to_spline(
         l,
     )
 }
-
 #[cfg(test)]
 mod tests {
     use serde::forward_to_deserialize_any;

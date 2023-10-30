@@ -4,6 +4,7 @@ use std::{
     path::{self, Path, PathBuf},
     sync::{Arc, Mutex},
 };
+use std::collections::HashMap;
 use tauri::State;
 
 use crate::{
@@ -12,7 +13,7 @@ use crate::{
     state::AppState,
     transformers::{structure_transformer, graph_transformer}, dto::api::{GraphDisplay, StructureDisplay, GraphDisplayProperties, GraphDisplayStyle},
 };
-
+use crate::dto::api::GraphType;
 pub fn get_graph(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<GraphDisplay> {
     let app_state = state.lock().map_err(|_| anyhow!("Error Accessing State"))?;
 
@@ -21,7 +22,6 @@ pub fn get_graph(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<Graph
         None => Err(anyhow!("Graph of id {} does not exist", graph_id)),
     }
 }
-
 pub fn create_graph(
     app_state_mutex: &State<Mutex<AppState>>,
     path_bufs: Vec<PathBuf>,
@@ -32,8 +32,17 @@ pub fn create_graph(
         .into_iter()
         .map(structure_service::create_structure)
         .collect::<Result<Vec<Structure>>>()?;
+    let structures_map: HashMap<Uuid, Structure> = structures
+        .into_iter()
+        .map(|structure| (*structure.get_id(), structure))
+        .collect();
+
     let id = Uuid::new_v4();
-    let graph = Graph::new(id, structures, GraphDisplayProperties::default(), GraphDisplayStyle::default());
+    let graph = Graph::new(id,
+                           GraphType::CurrentDensity,
+                           structures_map,
+                           GraphDisplayProperties::default(),
+                           GraphDisplayStyle::default());
 
     let graph_display = graph_transformer::to_graph_display(&graph)?;
 

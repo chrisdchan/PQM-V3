@@ -13,11 +13,11 @@ use tauri::{
 
 use crate::{
     controllers::graph_controller,
-    models::structure::{self, Metric, Structure},
-    services::{csv_service, structure_service},
     state::AppState,
     transformers::structure_transformer, dto::{api::GraphDisplay, api_error::ResponseError},
 };
+use crate::controllers::structure_controller;
+use crate::dto::api::StructureTable;
 
 #[tauri::command]
 pub fn get_graph(
@@ -71,3 +71,11 @@ pub fn select_files(
 //         .build();
 //     Ok(select_files_res)
 // }
+
+
+#[tauri::command]
+pub fn get_structure_table(
+    app_state_mutex: State<Mutex<AppState>>,
+    graph_id: String) -> Result<StructureTable, ResponseError> {
+    Err(ResponseError::new("Unimplemented".to_string()))
+}

@@ -1,7 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![allow(dead_code, unused_imports, unused_variables)]
 
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 use state::AppState;
 use tauri::generate_handler;
@@ -16,7 +17,6 @@ pub mod services;
 pub mod state;
 pub mod transformers;
 pub mod utils;
-
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))

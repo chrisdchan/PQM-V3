@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use anyhow::{anyhow, Result};
 use lombok::{AllArgsConstructor, Builder, Getter, Setter};
 use serde::{Deserialize, Serialize};
@@ -26,13 +27,53 @@ pub struct Structure {
 }
 
 impl Structure {
+
     pub fn get_y(&self, x: f32) -> Result<f32> {
-        let spline: &Spline = self.get_spline_from_x(x)?;
+        self.verify_in_domain(x)?;
+        let spline: &Spline = self.search_for_spline(x, |v, spline| spline.compare_with_domain(v))?;
         spline.get_y(x)
     }
+    pub fn get_x(&self, y: f32) -> Result<f32> {
+        self.verify_in_range(y)?;
+        let spline: &Spline = self.search_for_spline(y, |v, spline| spline.compare_with_range(y))?;
+        spline.get_x(y)
+    }
+    fn verify_in_domain(&self, x: f32) -> Result<bool> {
+        let first_spline: &Spline = self
+            .splines
+            .first()
+            .ok_or(anyhow!("Splines for structure is an empty list"))?;
+        let last_spline: &Spline = self
+            .splines
+            .last()
+            .ok_or(anyhow!("Splines for structure is an empty list"))?;
 
-    fn get_spline_from_x(&self, x: f32) -> Result<&Spline> {
-        self.verify_in_domain(x)?;
+        let res = first_spline.get_x1() <= &x && &x <= last_spline.get_x2();
+
+        match res {
+            true => Ok(res),
+            false => Err(anyhow!("Not in domain")),
+        }
+    }
+
+    fn verify_in_range(&self, y: f32) -> Result<bool>{
+        let first_spline: &Spline = self
+            .splines
+            .first()
+            .ok_or(anyhow!("Splines for structure is an empty list"))?;
+        let last_spline: &Spline = self
+            .splines
+            .last()
+            .ok_or(anyhow!("Splines for structure is an empty list"))?;
+
+        let res = first_spline.get_y1() >= &y && &y >= last_spline.get_y2();
+
+        match res {
+            true => Ok(res),
+            false => Err(anyhow!("Not in range")),
+        }
+    }
+    fn search_for_spline(&self, value: f32, comparator: impl Fn(f32, &Spline) -> std::cmp::Ordering) -> Result<&Spline> {
         let n = self.splines.len();
         let mut mid_ind = n / 2;
         let mut start = 0;
@@ -46,7 +87,7 @@ impl Structure {
         loop {
             count += 1;
 
-            match spline.compare_with_domain(x) {
+            match comparator(value, &spline) {
                 std::cmp::Ordering::Equal => return Ok(spline),
                 std::cmp::Ordering::Less => end = mid_ind,
                 std::cmp::Ordering::Greater => start = mid_ind,
@@ -63,20 +104,6 @@ impl Structure {
                 panic!("Infinite Loop occurred for mid_index = {}", mid_ind);
             }
         }
-    }
-
-    fn verify_in_domain(&self, x: f32) -> Result<bool> {
-        let first_spline: &Spline = self
-            .splines
-            .first()
-            .ok_or(anyhow!("Splines for structure is an empty list"))?;
-        let last_spline: &Spline = self
-            .splines
-            .last()
-            .ok_or(anyhow!("Splines for structure is an empty list"))?;
-
-        let res = first_spline.get_x1() < &x && &x < last_spline.get_x2();
-        Ok(res)
     }
 }
 

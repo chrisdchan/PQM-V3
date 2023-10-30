@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use lombok::{AllArgsConstructor, Getter};
 use serde::Serialize;
 
@@ -147,4 +148,14 @@ pub struct Line {
 pub struct Point {
     x: f32,
     y: f32,
+}
+
+
+#[derive(Serialize, Debug, AllArgsConstructor, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct StructureTable{
+    structure_name: String,
+    volume: f32,
+    area_map: HashMap<String, f32>,
+    cc: f32
 }

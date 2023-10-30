@@ -15,7 +15,7 @@ pub fn to_graph_display(graph: &Graph) -> Result<GraphDisplay> {
     let structure_displays: Vec<StructureDisplay> = graph
         .get_structures()
         .into_iter()
-        .map(|structure| {
+        .map(|(id, structure)| {
             structure_transformer::to_structure_display(
                 structure,
                 *x_axis_display_props.get_start(),
@@ -26,6 +26,7 @@ pub fn to_graph_display(graph: &Graph) -> Result<GraphDisplay> {
 
     let graph_display = GraphDisplay::new(
         graph.get_id().to_string(),
+        graph.get_graph_type().clone(),
         structure_displays,
         graph.get_graph_display_properties().clone(),
         graph.get_graph_style().clone(),

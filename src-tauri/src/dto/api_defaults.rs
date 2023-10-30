@@ -49,7 +49,7 @@ impl Default for GraphDisplayStyle {
 
 impl Default for StructureDisplayProperties {
     fn default() -> Self {
-        let line_type = LineType::SOLID;
+        let line_type = LineType::Solid;
         let resolution = 100;
         Self::new(line_type, resolution)
     }

@@ -4,6 +4,7 @@ use anyhow::anyhow;
 use anyhow::Result;
 use lombok::{AllArgsConstructor, Builder, Getter, Setter};
 use serde::{Deserialize, Serialize};
+use roots::{find_roots_cubic, Roots};
 
 #[derive(
     Serialize, PartialEq, Deserialize, Debug, Getter, Setter, AllArgsConstructor, Builder, Clone,
@@ -29,17 +30,49 @@ impl Spline {
         Ok(y)
     }
 
+    pub fn get_x(&self, y: f32) -> Result<f32> {
+        if y > self.y1 || self.y2 > y {
+            return Err(anyhow!("Input {} out of bounds on spline {:?}", y, self));
+        }
+        let roots = find_roots_cubic(self.a, self.b, self.c, self.d - y);
+        let roots = match roots {
+            Roots::No(arr) => arr.to_vec(),
+            Roots::One(arr) => arr.to_vec(),
+            Roots::Two(arr) => arr.to_vec(),
+            Roots::Three(arr) => arr.to_vec(),
+            Roots::Four(arr) => arr.to_vec(),
+        };
+
+        let roots: Vec<f32> = roots.into_iter().filter(|root| self.in_domain(*root)).collect();
+
+        if roots.len() == 1 {
+            Ok(roots[0])
+        } else {
+            Err(anyhow!("There should be exactly one root in the spline domain"))
+        }
+    }
+
     pub fn in_domain(&self, x: f32) -> bool {
         self.x1 <= x && x < self.x2
     }
 
     pub fn compare_with_domain(&self, x: f32) -> Ordering {
         if x < self.x1 {
-            return Ordering::Less;
+            Ordering::Less
         } else if self.x2 < x {
-            return Ordering::Greater;
+            Ordering::Greater
         } else {
-            return Ordering::Equal;
+            Ordering::Equal
+        }
+    }
+
+    pub fn compare_with_range(&self, y: f32) -> Ordering {
+        if y > self.y1 {
+            Ordering::Less
+        } else if y < self.y2 {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
         }
     }
 }
