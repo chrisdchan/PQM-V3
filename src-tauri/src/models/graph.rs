@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 use lombok::{AllArgsConstructor, Getter};
 use uuid::Uuid;
 
@@ -11,7 +12,7 @@ use super::structure::Structure;
 pub struct Graph {
     id: Uuid,
     graph_type: GraphType,
-    structures: HashMap<Uuid, Structure>,
+    structures: HashMap<Uuid, Arc<Structure>>,
     graph_display_properties: GraphDisplayProperties,
     graph_style: GraphDisplayStyle
 }

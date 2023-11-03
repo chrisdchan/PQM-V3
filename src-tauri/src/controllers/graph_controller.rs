@@ -14,27 +14,28 @@ use crate::{
     transformers::{structure_transformer, graph_transformer}, dto::api::{GraphDisplay, StructureDisplay, GraphDisplayProperties, GraphDisplayStyle},
 };
 use crate::dto::api::GraphType;
-pub fn get_graph(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<GraphDisplay> {
-    let app_state = state.lock().map_err(|_| anyhow!("Error Accessing State"))?;
+use crate::services::graph_service;
 
-    match &app_state.current_graph {
-        Some(graph) => graph_transformer::to_graph_display(graph),
-        None => Err(anyhow!("Graph of id {} does not exist", graph_id)),
-    }
+pub fn get_graph(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<GraphDisplay> {
+    let graph = graph_service::get_graph(state, graph_id)?;
+    graph_transformer::to_graph_display(graph.as_ref())
 }
 pub fn create_graph(
     app_state_mutex: &State<Mutex<AppState>>,
     path_bufs: Vec<PathBuf>,
 ) -> Result<GraphDisplay> {
-    let mut app_state = app_state_mutex.lock().map_err(|_| anyhow!("Error accessing state"))?;
+    let mut app_state =
+        app_state_mutex
+        .lock()
+        .map_err(|_| anyhow!("Error accessing state"))?;
 
     let structures: Vec<Structure> = path_bufs
         .into_iter()
         .map(structure_service::create_structure)
         .collect::<Result<Vec<Structure>>>()?;
-    let structures_map: HashMap<Uuid, Structure> = structures
+    let structures_map: HashMap<Uuid, Arc<Structure>> = structures
         .into_iter()
-        .map(|structure| (*structure.get_id(), structure))
+        .map(|structure| (*structure.get_id(), Arc::new(structure)))
         .collect();
 
     let id = Uuid::new_v4();
@@ -46,7 +47,7 @@ pub fn create_graph(
 
     let graph_display = graph_transformer::to_graph_display(&graph)?;
 
-    app_state.current_graph = Some(graph);
+    app_state.current_graph = Some(Arc::new(graph));
 
     Ok(graph_display)
 }

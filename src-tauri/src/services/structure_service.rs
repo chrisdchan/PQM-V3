@@ -5,6 +5,7 @@ use std::{
     path::PathBuf,
     sync::{Arc, Mutex},
 };
+use tauri::State;
 use uuid::Uuid;
 
 use crate::{
@@ -20,8 +21,10 @@ use crate::{
     transformers::path_buf_transformer,
     utils::{asserts::assert_result_msg, math::relative_eq},
 };
+use crate::dto::api::StructureTable;
+use crate::state::AppState;
 
-use super::csv_service;
+use super::{csv_service, graph_service};
 
 const LINE_SPLITTER: &str = "\n";
 const CELL_SPLITTER: &str = ",";
@@ -331,6 +334,18 @@ fn spline_dto_to_spline(
         l,
     )
 }
+
+pub fn get_structure(state: &State<Mutex<AppState>>, graph_id: &str, id: &str) -> Result<Arc<Structure>> {
+    let graph = graph_service::get_graph(state, graph_id)?;
+    let id = Uuid::parse_str(id).map_err(|_| anyhow!("Invalid id {}", id))?;
+    let structures = graph.get_structures();
+    if let Some(structure) = structures.get(&id) {
+        Ok(Arc::clone(structure))
+    } else {
+        Err(anyhow!("Structure not found with id {} for graph_id {}", id, graph_id))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde::forward_to_deserialize_any;
