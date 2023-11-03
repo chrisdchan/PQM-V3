@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::hash::Hash;
 use anyhow::Result;
 use uuid::Uuid;
 
@@ -5,6 +7,7 @@ use crate::{
     dto::api::{Curve, Line, Point, StructureDisplay, StructureDisplayProperties},
     models::structure::Structure,
 };
+use crate::dto::api::StructureTable;
 
 pub fn to_structure_display(
     structure: &Structure,
@@ -41,4 +44,32 @@ pub fn to_structure_display(
         structure.get_style().clone(),
     );
     Ok(structure_display)
+}
+
+pub fn to_structure_table(
+    structure: &Structure) -> Result<StructureTable> {
+
+    let structure_name = structure.get_name();
+    let volume = -1.;
+    let cc = structure.get_y(0.03)? * volume;
+
+    let y_values: Vec<f32> = vec![100., 95., 90., 50., 5.];
+    let x_values: Vec<f32> = y_values
+        .iter()
+        .map(|y| structure.get_x(*y))
+        .collect::<Result<Vec<f32>>>()?;
+
+    let map: HashMap<String, f32> = y_values
+        .iter()
+        .map(|y| y.to_string())
+        .zip(x_values.into_iter())
+        .collect();
+
+    let structure_table = StructureTable::new(
+        structure_name.clone(),
+        volume,
+        map,
+        cc
+    );
+    Ok(structure_table)
 }

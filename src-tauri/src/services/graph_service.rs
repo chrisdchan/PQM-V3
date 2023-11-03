@@ -12,9 +12,11 @@ pub fn get_graph(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<Arc<G
         None => Err(anyhow!("Graph of id {} does not exist", graph_id)),
     }?;
 
-    if graph.get_id().to_string() == graph_id {
-        Ok(Arc::clone(graph))
-    } else {
-        Err(anyhow!("Graph of id {} does not exist", graph_id))
-    }
+    Ok(Arc::clone(graph))
+
+    // if graph.get_id().to_string() == graph_id {
+    //     Ok(Arc::clone(graph))
+    // } else {
+    //     Err(anyhow!("Graph of id {} does not exist", graph_id))
+    // }
 }

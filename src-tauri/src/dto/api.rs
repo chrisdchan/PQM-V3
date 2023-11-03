@@ -156,6 +156,6 @@ pub struct Point {
 pub struct StructureTable{
     structure_name: String,
     volume: f32,
-    area_map: HashMap<String, f32>,
+    map: HashMap<String, f32>,
     cc: f32
 }
