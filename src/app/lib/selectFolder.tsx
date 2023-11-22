@@ -4,7 +4,6 @@ import { invoke } from "@tauri-apps/api"
 
 
 export default function SelectFolder() {
-
     const handleSelectFolder = () => {
         invoke('select_folder')
         .then(console.log)

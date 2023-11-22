@@ -21,7 +21,6 @@ use crate::{
     transformers::path_buf_transformer,
     utils::{asserts::assert_result_msg, math::relative_eq},
 };
-use crate::dto::api::StructureTable;
 use crate::state::AppState;
 
 use super::{csv_service, graph_service};

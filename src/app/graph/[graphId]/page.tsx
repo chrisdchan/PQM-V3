@@ -5,12 +5,11 @@ import { invoke } from "@tauri-apps/api"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { GraphDisplay } from "../../types/api"
-
+import Table from "@/app/lib/graphTable";
 const GraphPage = () => {
 
     const router = useRouter();
     let [currentGraph, setCurrentGraph] = useState<GraphDisplay|null>(null)
-
     const getCurrentGraph = async () => {
         try {
             const graphDisplay: GraphDisplay = await invoke('get_graph', {
@@ -25,17 +24,19 @@ const GraphPage = () => {
     }
 
     useEffect(() => {
-        getCurrentGraph()
+         getCurrentGraph()
     }, [])
 
     return (
         <div>
-            <div className="w-32 h-32">
+            <div>
                 <Graph graph={currentGraph} />
+            </div>
+            <div>
+                <Table graphId={"graph_id"}/>
             </div>
             <button onClick={() => router.back()}>back</button>
         </div>
     )
 }
-
 export default GraphPage;

@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use lombok::{AllArgsConstructor, Getter};
 use serde::Serialize;
-
-
 #[derive(Serialize, Debug, AllArgsConstructor, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ModelDisplay {
@@ -150,12 +148,16 @@ pub struct Point {
     y: f32,
 }
 
-
 #[derive(Serialize, Debug, AllArgsConstructor, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct StructureTable{
+pub struct StructureTableDisplay{
     structure_name: String,
     volume: f32,
     map: HashMap<String, f32>,
-    cc: f32
+    cc: f32,
+}
+#[derive(Serialize, Debug, AllArgsConstructor, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct GraphTableDisplay{
+    structure_table_displays: Vec<StructureTableDisplay>
 }

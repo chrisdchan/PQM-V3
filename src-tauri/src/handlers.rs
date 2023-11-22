@@ -17,7 +17,7 @@ use crate::{
     transformers::structure_transformer, dto::{api::GraphDisplay, api_error::ResponseError},
 };
 use crate::controllers::structure_controller;
-use crate::dto::api::StructureTable;
+use crate::dto::api::{GraphTableDisplay};
 
 #[tauri::command]
 pub fn get_graph(
@@ -41,11 +41,11 @@ pub fn select_files(
         });
     });
 
-    if let Ok(Some(path_bufs)) = reciever.recv() {
+    return if let Ok(Some(path_bufs)) = reciever.recv() {
         let graph_display = graph_controller::create_graph(&app_state_mutex, path_bufs)?;
-        return Ok(graph_display);
+        Ok(graph_display)
     } else {
-        return Err(ResponseError::new("Unable to detect file selection".to_string()));
+        Err(ResponseError::new("Unable to detect file selection".to_string()))
     } 
 }
 
@@ -71,11 +71,20 @@ pub fn select_files(
 //         .build();
 //     Ok(select_files_res)
 // }
-
-
 #[tauri::command]
-pub fn get_structure_table(
-    app_state_mutex: State<Mutex<AppState>>,
-    graph_id: String) -> Result<StructureTable, ResponseError> {
-    Err(ResponseError::new("Unimplemented".to_string()))
+pub fn get_graph_table(
+    app_state: State<Mutex<AppState>>,
+    graph_id: String) -> Result<GraphTableDisplay, ResponseError> {
+    match graph_controller::get_graph_table(&app_state, &graph_id) {
+        Ok(graphTableDisplay) => Ok(graphTableDisplay),
+        Err(e) => Err(ResponseError::new(e.to_string()))
+    }
+}
+#[tauri::command]
+pub fn export_graph_table(
+    app_state: State<Mutex<AppState>>,
+    graph_id: String,
+    path: String
+) {
+    println!("This will eventually save Graph to {}", path)
 }

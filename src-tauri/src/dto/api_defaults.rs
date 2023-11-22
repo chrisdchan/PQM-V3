@@ -57,7 +57,7 @@ impl Default for StructureDisplayProperties {
 
 impl Default for StructureDisplayStyle {
     fn default() -> Self {
-        let color = "0xff00ff".to_string();
+        let color = "0x1E1E1E".to_string();
         StructureDisplayStyle::new(color)
     }
 }

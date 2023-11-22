@@ -13,7 +13,7 @@ use crate::{
     state::AppState,
     transformers::{structure_transformer, graph_transformer}, dto::api::{GraphDisplay, StructureDisplay, GraphDisplayProperties, GraphDisplayStyle},
 };
-use crate::dto::api::GraphType;
+use crate::dto::api::{GraphTableDisplay, GraphType, StructureTableDisplay};
 use crate::services::graph_service;
 
 pub fn get_graph(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<GraphDisplay> {
@@ -50,4 +50,16 @@ pub fn create_graph(
     app_state.current_graph = Some(Arc::new(graph));
 
     Ok(graph_display)
+}
+
+pub fn get_graph_table(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<GraphTableDisplay> {
+    let graph = graph_service::get_graph(state, graph_id)?;
+    let structure_table_displays: Vec<StructureTableDisplay> = graph
+        .get_structures()
+        .values()
+        .into_iter()
+        .map(|structure| structure_transformer::to_structure_table(&structure))
+        .collect::<Result<Vec<StructureTableDisplay>>>()?;
+    let graph_table_display = GraphTableDisplay::new(structure_table_displays);
+    Ok(graph_table_display)
 }

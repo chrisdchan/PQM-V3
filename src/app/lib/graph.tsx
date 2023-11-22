@@ -19,8 +19,8 @@ const Graph: React.FC<GraphProps> = ({graph}) => {
     const backgrounGrapcisRef = useRef<PIXI.Graphics | null>(null);
 
     const [windowDimensions, setWindowDimensions] = useState<WindowDimensions>({
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: window.innerWidth * 0.8,
+        height: window.innerHeight * 0.8,
     });
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const Graph: React.FC<GraphProps> = ({graph}) => {
                 height: window.innerHeight * 0.8
             })
         };
-        
+
         window.addEventListener('resize', handleResize);
 
         return () => {

@@ -7,8 +7,7 @@ use std::sync::Mutex;
 use state::AppState;
 use tauri::generate_handler;
 
-use crate::handlers::{get_graph, select_files};
-
+use crate::handlers::{get_graph, select_files, get_graph_table, export_graph_table};
 pub mod controllers;
 pub mod dto;
 pub mod handlers;
@@ -20,7 +19,12 @@ pub mod utils;
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
-        .invoke_handler(generate_handler![select_files, get_graph])
+        .invoke_handler(generate_handler![
+            select_files,
+            get_graph,
+            get_graph_table,
+            export_graph_table
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

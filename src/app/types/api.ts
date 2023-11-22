@@ -109,9 +109,13 @@ export type Point = {
     y: number,
 }
 
-export type StructureTable = {
+export type StructureTableDisplay = {
     structureName: string,
     volume: number,
     areaMap: Record<string, number>,
     cc: number
+}
+
+export type GraphTableDisplay = {
+    structureTableDisplays: StructureTableDisplay[]
 }

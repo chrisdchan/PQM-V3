@@ -42,17 +42,20 @@ impl Spline {
             Roots::Three(arr) => arr.to_vec(),
             Roots::Four(arr) => arr.to_vec(),
         };
+        println!("{:?}", roots);
 
         let roots: Vec<f32> = roots.into_iter().filter(|root| self.in_domain(*root)).collect();
 
         if roots.len() == 1 {
             Ok(roots[0])
         } else {
+            println!("{:?}", roots);
             Err(anyhow!("There should be exactly one root in the spline domain"))
         }
     }
 
     pub fn in_domain(&self, x: f32) -> bool {
+        println!("{:?} <= {:?} < {:?}", self.x1, x, self.x2);
         self.x1 <= x && x < self.x2
     }
 
@@ -66,10 +69,13 @@ impl Spline {
         }
     }
 
+    /// Compares the range of a spline from [y2 - \epsilon, y1 + \epsilon]
+    /// Note: y2 < y1
     pub fn compare_with_range(&self, y: f32) -> Ordering {
-        if y > self.y1 {
+        let epsilon: f32 = 0.01;
+        if y > self.y1 + epsilon {
             Ordering::Less
-        } else if y < self.y2 {
+        } else if y < self.y2 - epsilon {
             Ordering::Greater
         } else {
             Ordering::Equal

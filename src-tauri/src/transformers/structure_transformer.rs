@@ -7,7 +7,7 @@ use crate::{
     dto::api::{Curve, Line, Point, StructureDisplay, StructureDisplayProperties},
     models::structure::Structure,
 };
-use crate::dto::api::StructureTable;
+use crate::dto::api::{StructureTableDisplay};
 
 pub fn to_structure_display(
     structure: &Structure,
@@ -47,7 +47,7 @@ pub fn to_structure_display(
 }
 
 pub fn to_structure_table(
-    structure: &Structure) -> Result<StructureTable> {
+    structure: &Structure) -> Result<StructureTableDisplay> {
 
     let structure_name = structure.get_name();
     let volume = -1.;
@@ -65,7 +65,7 @@ pub fn to_structure_table(
         .zip(x_values.into_iter())
         .collect();
 
-    let structure_table = StructureTable::new(
+    let structure_table = StructureTableDisplay::new(
         structure_name.clone(),
         volume,
         map,
