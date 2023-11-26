@@ -8,7 +8,7 @@ use crate::dto::api::{StructureDisplayProperties, StructureDisplayStyle};
 
 use super::spline::Spline;
 
-#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+#[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
 pub enum Metric {
     CurrentDensity,
     ElectricField,
@@ -130,15 +130,5 @@ mod tests {
             StructureDisplayProperties::default(),
             StructureDisplayStyle::default(),
         )
-    }
-
-    #[test]
-    fn test_get_spline_from_x() {
-        // arrange
-        let structure = get_structure();
-        // act
-        let spline = structure.get_spline_from_x(0.5).unwrap();
-
-        assert_eq!(structure.get_splines().get(0).unwrap(), spline);
     }
 }

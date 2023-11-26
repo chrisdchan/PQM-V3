@@ -6,7 +6,7 @@ use crate::models::structure::Metric;
 
 use super::spline_dto::SplineDtoRaw;
 
-#[derive(AllArgsConstructor, Debug, Clone)]
+#[derive(AllArgsConstructor, Debug, Clone, PartialEq)]
 pub struct StructureDto {
     pub name: String,
     pub file_name: String,

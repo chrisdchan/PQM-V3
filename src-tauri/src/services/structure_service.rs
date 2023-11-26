@@ -127,13 +127,7 @@ fn create_structure_dto(file_name: String, csv_string: String) -> Result<Structu
     let metric = get_metric(&file_name)?;
     let name = get_name(&file_name);
 
-    let structure_dto = StructureDto {
-        name: name,
-        frequency: frequency,
-        file_name: file_name,
-        metric: metric,
-        splines: spline_dtos,
-    };
+    let structure_dto = StructureDto { name, frequency, file_name, metric, splines: spline_dtos, };
     Ok(structure_dto)
 }
 
@@ -175,7 +169,8 @@ fn parse_y_str(y_cell_str: &str) -> Result<f32> {
 
 fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structure> {
     let normalized_structure_dto = normalize_structure_dto(&structure_dto)?;
-    let raw_splines = normalized_structure_dto.splines;
+    let filtered_splines = filter_out_horizontal_splines(normalized_structure_dto)?;
+    let raw_splines = filtered_splines.splines;
     let deltas = raw_splines.iter().map(convert_raw_to_with_delta).collect();
     let splines_with_initial_guess = get_derivative_guesses(deltas);
     let derivatives: Vec<SplineDtoWithDeriv> = splines_with_initial_guess
@@ -227,6 +222,41 @@ fn normalize_structure_dto(structure_dto: &StructureDto) -> Result<StructureDto>
         new_splines,
     );
 
+    Ok(new_structure_dto)
+}
+fn filter_out_horizontal_splines(structure_dto: StructureDto) -> Result<StructureDto> {
+    let mut new_splines: Vec<SplineDtoRaw> = vec![];
+    let splines = structure_dto.splines;
+    let first_spline = splines.get(0).ok_or(anyhow!("Missing Splines"))?;
+
+    let mut first_x = first_spline.x1;
+    let mut first_y = first_spline.y1;
+
+    for spline in splines {
+        if first_y < spline.y2 {
+            return Err(anyhow!("Values must be monotonically decreasing"));
+        }
+
+        if first_y > spline.y2 {
+            let new_spline = SplineDtoRaw::new(
+                first_x,
+                first_y,
+                spline.x2,
+                spline.y2
+            );
+            first_x = spline.x2;
+            first_y = spline.y2;
+            new_splines.push(new_spline);
+        }
+    }
+
+    let new_structure_dto = StructureDto::new(
+        structure_dto.name.clone(),
+        structure_dto.file_name.clone(),
+        structure_dto.frequency,
+        structure_dto.metric,
+        new_splines,
+    );
     Ok(new_structure_dto)
 }
 
@@ -347,6 +377,7 @@ pub fn get_structure(state: &State<Mutex<AppState>>, graph_id: &str, id: &str) -
 
 #[cfg(test)]
 mod tests {
+    use serde::de::Unexpected::StructVariant;
     use serde::forward_to_deserialize_any;
 
     use crate::dto::structure_dto;
@@ -369,7 +400,6 @@ mod tests {
         ];
         StructureDto::new(name, file_name, frequency, metric, splines)
     }
-
     #[test]
     fn test_create_structure_dto() {
         let file_name = "E-field Brainstem Raw.csv".to_string();
@@ -465,5 +495,53 @@ mod tests {
             assert!(y2 >= 0.);
             assert!(y2 <= 1.);
         }
+    }
+
+    #[test]
+    fn test_filter_out_horizontal_splines() {
+        // arrange
+        let name = String::from("name");
+        let file_name = String::from("file-name");
+        let frequency = 200.;
+        let metric = Metric::CurrentDensity;
+
+        let splines = vec![
+            SplineDtoRaw::new(0., 100., 1., 100.),
+            SplineDtoRaw::new(1., 100., 2., 100.),
+            SplineDtoRaw::new(2., 100., 3., 100.),
+            SplineDtoRaw::new(3., 100., 4., 98.),
+            SplineDtoRaw::new(4., 98., 5., 90.),
+            SplineDtoRaw::new(5., 90., 6., 90.),
+            SplineDtoRaw::new(6., 90., 7., 90.),
+            SplineDtoRaw::new(7., 90., 8., 90.),
+            SplineDtoRaw::new(8., 90., 9., 0.),
+        ];
+        let structure_dto = StructureDto::new(
+            name.clone(),
+            file_name.clone(),
+            frequency.clone(),
+            metric.clone(),
+            splines
+        );
+
+        // act
+        let actual = filter_out_horizontal_splines(structure_dto).unwrap();
+
+        // assert
+        let expected_splines = vec![
+            SplineDtoRaw::new(0., 100., 4., 98.),
+            SplineDtoRaw::new(4., 98., 5., 90.),
+            SplineDtoRaw::new(5., 90., 9., 0.),
+        ];
+
+        let expected = StructureDto::new(
+            name.clone(),
+            file_name.clone(),
+            frequency.clone(),
+            metric.clone(),
+            expected_splines
+        );
+
+        assert_eq!(actual, expected);
     }
 }

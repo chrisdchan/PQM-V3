@@ -1,6 +1,6 @@
 use lombok::AllArgsConstructor;
 
-#[derive(AllArgsConstructor, Debug, Clone)]
+#[derive(AllArgsConstructor, Debug, Clone, PartialEq)]
 pub struct SplineDtoRaw {
     pub x1: f32,
     pub y1: f32,
