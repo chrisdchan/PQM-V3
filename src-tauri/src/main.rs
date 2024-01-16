@@ -1,13 +1,14 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(dead_code, unused_imports, unused_variables)]
-
 use std::sync::Mutex;
-
 use state::AppState;
 use tauri::generate_handler;
-
 use crate::handlers::{get_graph, select_files, get_graph_table, export_graph_table};
+
+#[macro_use]
+extern crate public;
+
 pub mod controllers;
 pub mod dto;
 pub mod handlers;

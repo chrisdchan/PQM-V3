@@ -69,6 +69,7 @@ dependencies = [
  "anyhow",
  "csv",
  "lombok",
+ "public",
  "roots",
  "serde",
  "serde_json",
@@ -1983,6 +1984,12 @@ checksum = "18fb31db3f9bddb2ea821cde30a9f70117e3f119938b5ee630b7403aa6e2ead9"
 dependencies = [
  "unicode-ident",
 ]
+
+[[package]]
+name = "public"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "667546e771dadcc524095906f6b8e6182548519be5f27fd9cb09676b1a3e5cef"
 
 [[package]]
 name = "quick-xml"

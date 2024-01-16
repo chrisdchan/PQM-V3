@@ -38,6 +38,11 @@ impl Structure {
         let spline: &Spline = self.search_for_spline(y, |v, spline| spline.compare_with_range(y))?;
         spline.get_x(y)
     }
+    pub fn get_domain(&self) -> Result<(f32, f32)> {
+        let first: &Spline = self.splines.first().ok_or(anyhow!("No Splines Exists"))?;
+        let last: &Spline = self.splines.last().ok_or(anyhow!("No Splines Exist"))?;
+        Ok((first.get_x1().to_owned(), last.get_x2().to_owned()))
+    }
     fn verify_in_domain(&self, x: f32) -> Result<bool> {
         let first_spline: &Spline = self
             .splines
@@ -52,10 +57,9 @@ impl Structure {
 
         match res {
             true => Ok(res),
-            false => Err(anyhow!("Not in domain")),
+            false => Err(anyhow!("Value {} not in domain [{}, {}]", x, first_spline.get_x1(), last_spline.get_x2())),
         }
     }
-
     fn verify_in_range(&self, y: f32) -> Result<bool>{
         let first_spline: &Spline = self
             .splines

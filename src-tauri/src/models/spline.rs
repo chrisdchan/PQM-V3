@@ -68,14 +68,10 @@ impl Spline {
             Ordering::Equal
         }
     }
-
-    /// Compares the range of a spline from [y2 - \epsilon, y1 + \epsilon]
-    /// Note: y2 < y1
     pub fn compare_with_range(&self, y: f32) -> Ordering {
-        let epsilon: f32 = 0.01;
-        if y > self.y1 + epsilon {
+        if y > self.y1 {
             Ordering::Less
-        } else if y < self.y2 - epsilon {
+        } else if y < self.y2 {
             Ordering::Greater
         } else {
             Ordering::Equal

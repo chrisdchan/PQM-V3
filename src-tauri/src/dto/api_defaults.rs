@@ -1,18 +1,16 @@
-use super::api::{
-    AxisDisplayProperties, AxisStyle, GraphDisplayProperties, GraphDisplayStyle, LabelStyle,
-    LineStyle, LineType, Margin, StructureDisplayProperties, StructureDisplayStyle, TickLineStyle,
-};
+use std::collections::HashMap;
+use super::api::{AxisDisplayProperties, AxisStyle, GraphDisplayProperties, GraphDisplayStyle, GraphType, LabelStyle, LineStyle, LineType, Margin, StructureDisplayProperties, StructureDisplayStyle, TickLineStyle, Curve};
 
 impl Default for GraphDisplayProperties {
     fn default() -> Self {
         let title_name = "".to_owned();
         let x_axis_display_properties = AxisDisplayProperties::default();
         let y_axis_display_properties = AxisDisplayProperties::default();
-        Self::new(
-            title_name,
-            x_axis_display_properties,
-            y_axis_display_properties,
-        )
+        GraphDisplayProperties::builder()
+            .title_name(title_name)
+            .x_axis_display_properties(x_axis_display_properties)
+            .y_axis_display_properties(y_axis_display_properties)
+            .build()
     }
 }
 
@@ -49,9 +47,13 @@ impl Default for GraphDisplayStyle {
 
 impl Default for StructureDisplayProperties {
     fn default() -> Self {
-        let line_type = LineType::Solid;
-        let resolution = 100;
-        Self::new(line_type, resolution)
+        StructureDisplayProperties::builder().build()
+    }
+}
+
+impl Default for LineType {
+    fn default() -> Self {
+        Self::Solid
     }
 }
 
@@ -105,5 +107,11 @@ impl Default for TickLineStyle {
         let line_style = LineStyle::default();
         let length = 3.0;
         Self::new(line_style, length)
+    }
+}
+
+impl Default for Curve {
+    fn default() -> Self {
+        Curve::builder().lines(vec![]).build()
     }
 }

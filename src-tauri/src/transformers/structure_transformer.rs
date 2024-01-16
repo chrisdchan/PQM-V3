@@ -37,12 +37,12 @@ pub fn to_structure_display(
     }
 
     let curve = Curve::new(lines);
-    let structure_display = StructureDisplay::new(
-        structure.get_id().to_string(),
-        curve,
-        structure.get_display_properties().clone(),
-        structure.get_style().clone(),
-    );
+    let structure_display = StructureDisplay::builder()
+        .id(structure.get_id().to_string())
+        .curve(curve)
+        .display_properties(structure.get_display_properties().clone())
+        .build();
+
     Ok(structure_display)
 }
 

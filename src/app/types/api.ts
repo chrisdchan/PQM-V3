@@ -21,18 +21,19 @@ export type StructureDisplay = {
     id: string,
     curve: Curve,
     structureDisplayProperties: StructureDisplayProperties,
-    structureDisplayStyle: StructureDisplayStyle,
 }
 
 export type GraphDisplayProperties = {
     titleName: string,
     xAxisDisplayProperties: AxisDisplayProperties,
-    yAxisDisplayProperties: AxisDisplayProperties
+    yAxisDisplayProperties: AxisDisplayProperties,
+    stype: GraphDisplayStyle
 }
 
 export type StructureDisplayProperties = {
     lineType: LineType
     resolution: number
+    stype: StructureDisplayStyle
 }
 
 export enum LineType {

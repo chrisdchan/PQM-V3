@@ -76,7 +76,7 @@ pub fn get_graph_table(
     app_state: State<Mutex<AppState>>,
     graph_id: String) -> Result<GraphTableDisplay, ResponseError> {
     match graph_controller::get_graph_table(&app_state, &graph_id) {
-        Ok(graphTableDisplay) => Ok(graphTableDisplay),
+        Ok(graph_table_display) => Ok(graph_table_display),
         Err(e) => Err(ResponseError::new(e.to_string()))
     }
 }

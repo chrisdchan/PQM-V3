@@ -194,7 +194,6 @@ fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structure> {
         StructureDisplayStyle::default(),
     ))
 }
-
 fn normalize_structure_dto(structure_dto: &StructureDto) -> Result<StructureDto> {
     let max_y_val = structure_dto
         .splines

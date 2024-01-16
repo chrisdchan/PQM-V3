@@ -31,7 +31,7 @@ pub fn create_graph(
 
     let structures: Vec<Structure> = path_bufs
         .into_iter()
-        .map(structure_service::create_structure)
+        .map(create_structure)
         .collect::<Result<Vec<Structure>>>()?;
     let structures_map: HashMap<Uuid, Arc<Structure>> = structures
         .into_iter()
@@ -39,11 +39,12 @@ pub fn create_graph(
         .collect();
 
     let id = Uuid::new_v4();
-    let graph = Graph::new(id,
-                           GraphType::CurrentDensity,
-                           structures_map,
-                           GraphDisplayProperties::default(),
-                           GraphDisplayStyle::default());
+    let graph = Graph::builder()
+        .id(id)
+        .graph_type(None)
+        .structures(structures_map)
+        .build();
+
 
     let graph_display = graph_transformer::to_graph_display(&graph)?;
 

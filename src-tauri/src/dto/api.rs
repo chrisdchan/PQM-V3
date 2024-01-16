@@ -1,5 +1,6 @@
+use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
-use lombok::{AllArgsConstructor, Getter};
+use lombok::{AllArgsConstructor, Builder, Getter};
 use serde::Serialize;
 #[derive(Serialize, Debug, AllArgsConstructor, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -7,14 +8,13 @@ pub struct ModelDisplay {
     id: String,
 }
 
-#[derive(Serialize, Debug, AllArgsConstructor, Clone)]
+#[derive(Serialize, Debug, AllArgsConstructor, Clone, Builder)]
 #[serde(rename_all = "camelCase")]
 pub struct GraphDisplay {
     id: String,
-    graph_type: GraphType,
+    graph_type: Option<GraphType>,
     structures: Vec<StructureDisplay>,
-    graph_display_properties: GraphDisplayProperties,
-    graph_display_style: GraphDisplayStyle,
+    display_properties: GraphDisplayProperties,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -22,32 +22,33 @@ pub struct GraphDisplay {
 pub enum GraphType {
     CurrentDensity,
     EField,
-    SAR
+    SAR,
 }
 
 
-#[derive(Serialize, Debug, AllArgsConstructor, Clone)]
+#[derive(Serialize, Debug, AllArgsConstructor, Clone, Builder)]
 #[serde(rename_all = "camelCase")]
 pub struct StructureDisplay {
     id: String,
     curve: Curve,
-    structure_display_properties: StructureDisplayProperties,
-    structure_display_style: StructureDisplayStyle,
+    display_properties: StructureDisplayProperties
 }
 
-#[derive(Serialize, Debug, AllArgsConstructor, Getter, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Serialize, Debug, AllArgsConstructor, Getter, Clone, Builder)]
+#[serde(rename_all="camelCase")]
 pub struct GraphDisplayProperties {
     title_name: String,
     x_axis_display_properties: AxisDisplayProperties,
     y_axis_display_properties: AxisDisplayProperties,
+    style: GraphDisplayStyle,
 }
 
-#[derive(Serialize, Debug, AllArgsConstructor, Getter, Clone)]
+#[derive(Serialize, Debug, AllArgsConstructor, Getter, Clone, Builder)]
 #[serde(rename_all = "camelCase")]
 pub struct StructureDisplayProperties {
     line_type: LineType,
     resolution: i32,
+    style: StructureDisplayStyle
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -66,7 +67,7 @@ pub struct AxisDisplayProperties {
     end: f32,
     num_ticks: i32,
     tick_gap: f32,
-    percision: i32,
+    precision: i32,
 }
 
 // Attributes that are aesthetic only and require no backend logic
@@ -82,7 +83,7 @@ pub struct GraphDisplayStyle {
 }
 
 // Attributes that are aesthetic only and require no backend logic
-#[derive(Serialize, Debug, AllArgsConstructor, Clone)]
+#[derive(Serialize, Debug, AllArgsConstructor, Clone, Builder)]
 #[serde(rename_all = "camelCase")]
 pub struct StructureDisplayStyle {
     color: String,
@@ -128,7 +129,7 @@ pub struct TickLineStyle {
     line_style: LineStyle,
     length: f32,
 }
-#[derive(Serialize, Debug, AllArgsConstructor, Clone)]
+#[derive(Serialize, Debug, AllArgsConstructor, Clone, Builder)]
 #[serde(rename_all = "camelCase")]
 pub struct Curve {
     lines: Vec<Line>,

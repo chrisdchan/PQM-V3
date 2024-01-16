@@ -1,9 +1,10 @@
 use crate::{
-    dto::api::{GraphDisplay, StructureDisplay},
+    dto::api::{GraphDisplay, StructureDisplay, GraphDisplayStyle},
     models::graph::Graph,
 };
 
 use anyhow::Result;
+use crate::dto::api::GraphDisplayProperties;
 
 use super::structure_transformer;
 
@@ -24,13 +25,12 @@ pub fn to_graph_display(graph: &Graph) -> Result<GraphDisplay> {
         })
         .collect::<Result<Vec<StructureDisplay>>>()?;
 
-    let graph_display = GraphDisplay::new(
-        graph.get_id().to_string(),
-        graph.get_graph_type().clone(),
-        structure_displays,
-        graph.get_graph_display_properties().clone(),
-        graph.get_graph_style().clone(),
-    );
+    let graph_display = GraphDisplay::builder()
+        .id(graph.get_id().to_string())
+        .graph_type(graph.get_graph_type().clone())
+        .structures(structure_displays)
+        .display_properties(graph.get_graph_display_properties().clone())
+        .build();
 
     Ok(graph_display)
 }
