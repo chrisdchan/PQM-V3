@@ -1,5 +1,3 @@
-
-
 export type ModelDisplay = {
     id: string,
 }
@@ -7,8 +5,7 @@ export type ModelDisplay = {
 export type GraphDisplay = {
     id: string,
     structures: StructureDisplay[],
-    graphDisplayProperties: GraphDisplayProperties,
-    graphDisplayStyle: GraphDisplayStyle,
+    displayProperties: GraphDisplayProperties,
 }
 
 export enum GraphType {
@@ -20,20 +17,20 @@ export enum GraphType {
 export type StructureDisplay = {
     id: string,
     curve: Curve,
-    structureDisplayProperties: StructureDisplayProperties,
+    displayProperties: StructureDisplayProperties,
 }
 
 export type GraphDisplayProperties = {
     titleName: string,
     xAxisDisplayProperties: AxisDisplayProperties,
     yAxisDisplayProperties: AxisDisplayProperties,
-    stype: GraphDisplayStyle
+    style: GraphDisplayStyle
 }
 
 export type StructureDisplayProperties = {
     lineType: LineType
     resolution: number
-    stype: StructureDisplayStyle
+    style: StructureDisplayStyle
 }
 
 export enum LineType {
