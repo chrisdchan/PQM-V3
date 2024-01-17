@@ -367,13 +367,17 @@ fn spline_dto_to_spline(
     )
 }
 
-pub fn get_structure(state: State<AppState>, graph_id: &str, id: &str) -> Result<Arc<Structure>> {
+pub fn get_structure(
+    state: State<AppState>,
+    graph_id: &str,
+    id: &str,
+) -> Result<Arc<Mutex<Structure>>> {
     let id = Uuid::parse_str(id).map_err(|_| anyhow!("Invalid id {}", id))?;
     let graph_mutex = graph_service::get_graph(state, graph_id)?;
     let graph = graph_mutex.lock().unwrap();
     let structures = graph.get_structures();
     if let Some(structure) = structures.get(&id) {
-        Ok(Arc::clone(structure))
+        Ok(Arc::clone(&structure))
     } else {
         Err(anyhow!(
             "Structure not found with id {} for graph_id {}",

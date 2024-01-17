@@ -1,10 +1,11 @@
 use crate::{
-    dto::api::{GraphDisplay, StructureDisplay, GraphDisplayStyle},
+    dto::api::{GraphDisplay, GraphDisplayStyle, StructureDisplay},
     models::graph::Graph,
 };
+use std::sync::Arc;
 
-use anyhow::Result;
 use crate::dto::api::GraphDisplayProperties;
+use anyhow::Result;
 
 use super::structure_transformer;
 
@@ -18,7 +19,7 @@ pub fn to_graph_display(graph: &Graph) -> Result<GraphDisplay> {
         .into_iter()
         .map(|(id, structure)| {
             structure_transformer::to_structure_display(
-                structure,
+                Arc::clone(structure),
                 *x_axis_display_props.get_start(),
                 *x_axis_display_props.get_end(),
             )
