@@ -8,8 +8,7 @@ use crate::dto::api::{GraphDisplayProperties, GraphDisplayStyle, GraphType};
 
 use super::structure::Structure;
 
-
-#[derive(AllArgsConstructor, Getter, Debug, Builder)]
+#[derive(AllArgsConstructor, Getter, Debug, Builder, Clone)]
 pub struct Graph {
     id: Uuid,
     graph_type: Option<GraphType>,
