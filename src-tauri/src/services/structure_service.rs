@@ -8,6 +8,7 @@ use std::{
 use tauri::State;
 use uuid::Uuid;
 
+use crate::state::AppState;
 use crate::{
     dto::{
         api::{StructureDisplayProperties, StructureDisplayStyle},
@@ -21,7 +22,6 @@ use crate::{
     transformers::path_buf_transformer,
     utils::{asserts::assert_result_msg, math::relative_eq},
 };
-use crate::state::AppState;
 
 use super::{csv_service, graph_service};
 
@@ -32,7 +32,8 @@ const Y_VALUE_LINE_INDEX: usize = 5;
 const CELL_SUFFIX: &str = "\r";
 
 pub fn create_structure(path_buf: PathBuf) -> Result<Structure> {
-    let csv_string = csv_service::read_csv(&path_buf)?;
+    // let csv_string = csv_service::read_csv(&path_buf)?;
+    let csv_string = "hi".to_string();
     let file_name = path_buf_transformer::to_file_name(&path_buf)?;
     let structure_dto = create_structure_dto(file_name, csv_string)?;
     println!("Created StructureDTO Sucessful");
@@ -127,7 +128,13 @@ fn create_structure_dto(file_name: String, csv_string: String) -> Result<Structu
     let metric = get_metric(&file_name)?;
     let name = get_name(&file_name);
 
-    let structure_dto = StructureDto { name, frequency, file_name, metric, splines: spline_dtos, };
+    let structure_dto = StructureDto {
+        name,
+        frequency,
+        file_name,
+        metric,
+        splines: spline_dtos,
+    };
     Ok(structure_dto)
 }
 
@@ -237,12 +244,7 @@ fn filter_out_horizontal_splines(structure_dto: StructureDto) -> Result<Structur
         }
 
         if first_y > spline.y2 {
-            let new_spline = SplineDtoRaw::new(
-                first_x,
-                first_y,
-                spline.x2,
-                spline.y2
-            );
+            let new_spline = SplineDtoRaw::new(first_x, first_y, spline.x2, spline.y2);
             first_x = spline.x2;
             first_y = spline.y2;
             new_splines.push(new_spline);
@@ -363,14 +365,19 @@ fn spline_dto_to_spline(
     )
 }
 
-pub fn get_structure(state: &State<Mutex<AppState>>, graph_id: &str, id: &str) -> Result<Arc<Structure>> {
-    let graph = graph_service::get_graph(state, graph_id)?;
+pub fn get_structure(state: State<AppState>, graph_id: &str, id: &str) -> Result<Arc<Structure>> {
     let id = Uuid::parse_str(id).map_err(|_| anyhow!("Invalid id {}", id))?;
+    let graph = graph_service::get_graph(state, graph_id)?;
+    let graph = graph.lock().unwrap();
     let structures = graph.get_structures();
     if let Some(structure) = structures.get(&id) {
         Ok(Arc::clone(structure))
     } else {
-        Err(anyhow!("Structure not found with id {} for graph_id {}", id, graph_id))
+        Err(anyhow!(
+            "Structure not found with id {} for graph_id {}",
+            id,
+            graph_id
+        ))
     }
 }
 
@@ -520,7 +527,7 @@ mod tests {
             file_name.clone(),
             frequency.clone(),
             metric.clone(),
-            splines
+            splines,
         );
 
         // act
@@ -538,7 +545,7 @@ mod tests {
             file_name.clone(),
             frequency.clone(),
             metric.clone(),
-            expected_splines
+            expected_splines,
         );
 
         assert_eq!(actual, expected);

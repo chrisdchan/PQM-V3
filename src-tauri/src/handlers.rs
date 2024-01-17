@@ -11,27 +11,23 @@ use tauri::{
     State,
 };
 
+use crate::controllers::structure_controller;
+use crate::dto::api::GraphTableDisplay;
 use crate::{
     controllers::graph_controller,
+    dto::{api::GraphDisplay, api_error::ResponseError},
     state::AppState,
-    transformers::structure_transformer, dto::{api::GraphDisplay, api_error::ResponseError},
+    transformers::structure_transformer,
 };
-use crate::controllers::structure_controller;
-use crate::dto::api::{GraphTableDisplay};
 
 #[tauri::command]
-pub fn get_graph(
-    app_state_mutex: State<Mutex<AppState>>,
-    graph_id: String,
-) -> Result<GraphDisplay, ResponseError> {
-    let graph_response = graph_controller::get_graph(&app_state_mutex, &graph_id)?;
+pub fn get_graph(state: State<AppState>, graph_id: String) -> Result<GraphDisplay, ResponseError> {
+    let graph_response = graph_controller::get_graph(state, &graph_id)?;
     Ok(graph_response)
 }
 
 #[tauri::command]
-pub fn select_files(
-    app_state_mutex: State<Mutex<AppState>>,
-) -> Result<GraphDisplay, ResponseError> {
+pub fn select_files(state: State<AppState>) -> Result<GraphDisplay, ResponseError> {
     let (sender, reciever) = std::sync::mpsc::channel();
     FileDialogBuilder::new().pick_files(move |file_paths| {
         let sender_clone = sender.clone();
@@ -42,11 +38,13 @@ pub fn select_files(
     });
 
     return if let Ok(Some(path_bufs)) = reciever.recv() {
-        let graph_display = graph_controller::create_graph(&app_state_mutex, path_bufs)?;
+        let graph_display = graph_controller::create_graph(state, path_bufs)?;
         Ok(graph_display)
     } else {
-        Err(ResponseError::new("Unable to detect file selection".to_string()))
-    } 
+        Err(ResponseError::new(
+            "Unable to detect file selection".to_string(),
+        ))
+    };
 }
 
 // #[tauri::command]
@@ -73,18 +71,15 @@ pub fn select_files(
 // }
 #[tauri::command]
 pub fn get_graph_table(
-    app_state: State<Mutex<AppState>>,
-    graph_id: String) -> Result<GraphTableDisplay, ResponseError> {
-    match graph_controller::get_graph_table(&app_state, &graph_id) {
+    state: State<AppState>,
+    graph_id: String,
+) -> Result<GraphTableDisplay, ResponseError> {
+    match graph_controller::get_graph_table(state, &graph_id) {
         Ok(graph_table_display) => Ok(graph_table_display),
-        Err(e) => Err(ResponseError::new(e.to_string()))
+        Err(e) => Err(ResponseError::new(e.to_string())),
     }
 }
 #[tauri::command]
-pub fn export_graph_table(
-    app_state: State<Mutex<AppState>>,
-    graph_id: String,
-    path: String
-) {
+pub fn export_graph_table(app_state: State<Mutex<AppState>>, graph_id: String, path: String) {
     println!("This will eventually save Graph to {}", path)
 }
