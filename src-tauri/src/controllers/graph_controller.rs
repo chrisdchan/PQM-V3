@@ -29,9 +29,9 @@ pub fn create_graph(state: State<AppState>, path_bufs: Vec<PathBuf>) -> Result<G
         .into_iter()
         .map(create_structure)
         .collect::<Result<Vec<Structure>>>()?;
-    let structures_map: HashMap<Uuid, Arc<Structure>> = structures
+    let structures_map: HashMap<Uuid, Arc<Mutex<Structure>>> = structures
         .into_iter()
-        .map(|structure| (*structure.get_id(), Arc::new(structure)))
+        .map(|structure| (*structure.get_id(), Arc::new(Mutex::new(structure))))
         .collect();
 
     let id = Uuid::new_v4();
@@ -55,7 +55,7 @@ pub fn get_graph_table(state: State<AppState>, graph_id: &str) -> Result<GraphTa
         .get_structures()
         .values()
         .into_iter()
-        .map(|structure| structure_transformer::to_structure_table(&structure))
+        .map(|structure| structure_transformer::to_structure_table(Arc::clone(&structure)))
         .collect::<Result<Vec<StructureTableDisplay>>>()?;
     let graph_table_display = GraphTableDisplay::new(structure_table_displays);
     Ok(graph_table_display)

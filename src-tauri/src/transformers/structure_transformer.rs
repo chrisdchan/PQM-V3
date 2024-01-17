@@ -1,19 +1,21 @@
+use anyhow::Result;
 use std::collections::HashMap;
 use std::hash::Hash;
-use anyhow::Result;
+use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
+use crate::dto::api::StructureTableDisplay;
 use crate::{
     dto::api::{Curve, Line, Point, StructureDisplay, StructureDisplayProperties},
     models::structure::Structure,
 };
-use crate::dto::api::{StructureTableDisplay};
 
 pub fn to_structure_display(
-    structure: &Structure,
+    structure_mutex: Arc<Mutex<Structure>>,
     start: f32,
     end: f32,
 ) -> Result<StructureDisplay> {
+    let structure = structure_mutex.lock().unwrap();
     let display_properties: &StructureDisplayProperties = structure.get_display_properties();
     let dx: f32 = (end - start) / *display_properties.get_resolution() as f32;
 
@@ -46,9 +48,8 @@ pub fn to_structure_display(
     Ok(structure_display)
 }
 
-pub fn to_structure_table(
-    structure: &Structure) -> Result<StructureTableDisplay> {
-
+pub fn to_structure_table(structure_mutex: Arc<Mutex<Structure>>) -> Result<StructureTableDisplay> {
+    let structure = structure_mutex.lock().unwrap();
     let structure_name = structure.get_name();
     let volume = -1.;
     let cc = structure.get_y(0.03)? * volume;
@@ -65,11 +66,6 @@ pub fn to_structure_table(
         .zip(x_values.into_iter())
         .collect();
 
-    let structure_table = StructureTableDisplay::new(
-        structure_name.clone(),
-        volume,
-        map,
-        cc
-    );
+    let structure_table = StructureTableDisplay::new(structure_name.clone(), volume, map, cc);
     Ok(structure_table)
 }
