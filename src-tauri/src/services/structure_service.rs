@@ -201,6 +201,7 @@ fn create_structure_from_dto(structure_dto: StructureDto) -> Result<Structure> {
         StructureDisplayStyle::default(),
     ))
 }
+
 fn normalize_structure_dto(structure_dto: &StructureDto) -> Result<StructureDto> {
     let max_y_val = structure_dto
         .splines
@@ -230,6 +231,7 @@ fn normalize_structure_dto(structure_dto: &StructureDto) -> Result<StructureDto>
 
     Ok(new_structure_dto)
 }
+
 fn filter_out_horizontal_splines(structure_dto: StructureDto) -> Result<StructureDto> {
     let mut new_splines: Vec<SplineDtoRaw> = vec![];
     let splines = structure_dto.splines;
@@ -367,8 +369,8 @@ fn spline_dto_to_spline(
 
 pub fn get_structure(state: State<AppState>, graph_id: &str, id: &str) -> Result<Arc<Structure>> {
     let id = Uuid::parse_str(id).map_err(|_| anyhow!("Invalid id {}", id))?;
-    let graph = graph_service::get_graph(state, graph_id)?;
-    let graph = graph.lock().unwrap();
+    let graph_mutex = graph_service::get_graph(state, graph_id)?;
+    let graph = graph_mutex.lock().unwrap();
     let structures = graph.get_structures();
     if let Some(structure) = structures.get(&id) {
         Ok(Arc::clone(structure))
@@ -406,6 +408,7 @@ mod tests {
         ];
         StructureDto::new(name, file_name, frequency, metric, splines)
     }
+
     #[test]
     fn test_create_structure_dto() {
         let file_name = "E-field Brainstem Raw.csv".to_string();

@@ -6,14 +6,14 @@ use crate::services::implementations::csv_service_impl::CsvServiceImpl;
 
 #[derive(Debug)]
 pub struct AppState {
-    pub current_graph: Arc<Mutex<Option<Graph>>>,
+    pub current_graph: Arc<Mutex<Option<Arc<Mutex<Graph>>>>>,
     pub csv_service: Arc<dyn CsvService>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
-            current_graph: None,
+            current_graph: Arc::new(Mutex::new(None)),
             csv_service: Arc::new(CsvServiceImpl {}),
         }
     }

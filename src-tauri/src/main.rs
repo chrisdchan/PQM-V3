@@ -12,12 +12,14 @@ extern crate public;
 
 pub mod controllers;
 pub mod dto;
+mod errors;
 pub mod handlers;
 pub mod models;
 pub mod services;
 pub mod state;
 pub mod transformers;
 pub mod utils;
+
 fn main() {
     let csv_service = CsvServiceImpl {};
 
