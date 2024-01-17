@@ -1,10 +1,11 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(dead_code, unused_imports, unused_variables)]
-use std::sync::Mutex;
+use crate::handlers::{export_graph_table, get_graph, get_graph_table, select_files};
+use crate::services::implementations::csv_service_impl::CsvServiceImpl;
 use state::AppState;
+use std::sync::{Arc, Mutex};
 use tauri::generate_handler;
-use crate::handlers::{get_graph, select_files, get_graph_table, export_graph_table};
 
 #[macro_use]
 extern crate public;
@@ -18,8 +19,10 @@ pub mod state;
 pub mod transformers;
 pub mod utils;
 fn main() {
+    let csv_service = CsvServiceImpl {};
+
     tauri::Builder::default()
-        .manage(Mutex::new(AppState::default()))
+        .manage(AppState::default())
         .invoke_handler(generate_handler![
             select_files,
             get_graph,

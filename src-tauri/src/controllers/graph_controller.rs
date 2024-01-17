@@ -1,34 +1,27 @@
 use anyhow::{anyhow, Result};
-use uuid::Uuid;
+use std::collections::HashMap;
 use std::{
     path::{self, Path, PathBuf},
     sync::{Arc, Mutex},
 };
-use std::collections::HashMap;
 use tauri::State;
+use uuid::Uuid;
 
+use crate::dto::api::{GraphTableDisplay, GraphType, StructureTableDisplay};
+use crate::services::graph_service;
 use crate::{
+    dto::api::{GraphDisplay, GraphDisplayProperties, GraphDisplayStyle, StructureDisplay},
     models::{graph::Graph, structure::Structure},
     services::structure_service::{self, create_structure},
     state::AppState,
-    transformers::{structure_transformer, graph_transformer}, dto::api::{GraphDisplay, StructureDisplay, GraphDisplayProperties, GraphDisplayStyle},
+    transformers::{graph_transformer, structure_transformer},
 };
-use crate::dto::api::{GraphTableDisplay, GraphType, StructureTableDisplay};
-use crate::services::graph_service;
 
-pub fn get_graph(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<GraphDisplay> {
-    let graph = graph_service::get_graph(state, graph_id)?;
-    graph_transformer::to_graph_display(graph.as_ref())
+pub fn get_graph(state: State<AppState>, graph_id: &str) -> Result<GraphDisplay> {
+    let graph = graph_service::get_graph(state, graph_id)?.lock().unwrap();
+    graph_transformer::to_graph_display(&graph)
 }
-pub fn create_graph(
-    app_state_mutex: &State<Mutex<AppState>>,
-    path_bufs: Vec<PathBuf>,
-) -> Result<GraphDisplay> {
-    let mut app_state =
-        app_state_mutex
-        .lock()
-        .map_err(|_| anyhow!("Error accessing state"))?;
-
+pub fn create_graph(state: State<AppState>, path_bufs: Vec<PathBuf>) -> Result<GraphDisplay> {
     let structures: Vec<Structure> = path_bufs
         .into_iter()
         .map(create_structure)
@@ -45,16 +38,16 @@ pub fn create_graph(
         .structures(structures_map)
         .build();
 
-
     let graph_display = graph_transformer::to_graph_display(&graph)?;
 
-    app_state.current_graph = Some(Arc::new(graph));
+    state.current_graph = Some(Arc::new(Mutex::new(graph)));
 
     Ok(graph_display)
 }
 
-pub fn get_graph_table(state: &State<Mutex<AppState>>, graph_id: &str) -> Result<GraphTableDisplay> {
+pub fn get_graph_table(state: State<AppState>, graph_id: &str) -> Result<GraphTableDisplay> {
     let graph = graph_service::get_graph(state, graph_id)?;
+    let graph = graph.lock().unwrap();
     let structure_table_displays: Vec<StructureTableDisplay> = graph
         .get_structures()
         .values()
