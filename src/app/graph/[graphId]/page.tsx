@@ -7,14 +7,14 @@ import {useEffect, useState} from "react"
 import {GraphDisplay} from "../../types/api"
 import Table from "@/app/lib/graphTable";
 
-const GraphPage = () => {
+const GraphPage = ({params}: { params: { graphId: string } }) => {
 
     const router = useRouter();
     let [currentGraph, setCurrentGraph] = useState<GraphDisplay | null>(null)
     const getCurrentGraph = async () => {
         try {
             const graphDisplay: GraphDisplay = await invoke('get_graph', {
-                graphId: "graph_id"
+                graphId: params.graphId
             });
 
             setCurrentGraph(graphDisplay)
@@ -34,7 +34,7 @@ const GraphPage = () => {
                 {currentGraph !== null && <Graph graph={currentGraph}/>}
             </div>
             <div>
-                <Table graphId={"graph_id"}/>
+                <Table graphId={params.graphId}/>
             </div>
             <button onClick={() => router.back()}>back</button>
         </div>

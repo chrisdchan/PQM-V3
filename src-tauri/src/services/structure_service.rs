@@ -1,13 +1,15 @@
-use anyhow::{anyhow, Result};
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     iter::{self, zip},
     path::PathBuf,
     sync::{Arc, Mutex},
 };
+
+use anyhow::{anyhow, Result};
 use tauri::State;
 use uuid::Uuid;
 
+use crate::services::csv_service::CsvService;
 use crate::state::AppState;
 use crate::{
     dto::{
@@ -23,7 +25,7 @@ use crate::{
     utils::{asserts::assert_result_msg, math::relative_eq},
 };
 
-use super::{csv_service, graph_service};
+use super::graph_service;
 
 const LINE_SPLITTER: &str = "\n";
 const CELL_SPLITTER: &str = ",";
@@ -31,9 +33,11 @@ const X_VALUE_LINE_INDEX: usize = 4;
 const Y_VALUE_LINE_INDEX: usize = 5;
 const CELL_SUFFIX: &str = "\r";
 
-pub fn create_structure(path_buf: PathBuf) -> Result<Structure> {
+pub fn create_structure(state: &State<AppState>, path_buf: PathBuf) -> Result<Structure> {
     // let csv_string = csv_service::read_csv(&path_buf)?;
-    let csv_string = "hi".to_string();
+    // let csv_string = "hi".to_string();
+    let csv_service: Arc<dyn CsvService> = Arc::clone(&state.csv_service);
+    let csv_string = csv_service.read_csv(&path_buf)?;
     let file_name = path_buf_transformer::to_file_name(&path_buf)?;
     let structure_dto = create_structure_dto(file_name, csv_string)?;
     println!("Created StructureDTO Sucessful");
@@ -389,11 +393,6 @@ pub fn get_structure(
 
 #[cfg(test)]
 mod tests {
-    use serde::de::Unexpected::StructVariant;
-    use serde::forward_to_deserialize_any;
-
-    use crate::dto::structure_dto;
-
     use super::*;
 
     fn generate_struture_dto() -> StructureDto {

@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{ensure, Result};
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::sync::{Arc, Mutex};
@@ -17,7 +17,11 @@ pub fn to_structure_display(
 ) -> Result<StructureDisplay> {
     let structure = structure_mutex.lock().unwrap();
     let display_properties: &StructureDisplayProperties = structure.get_display_properties();
+
+    let resolution: i32 = *display_properties.get_resolution();
+    ensure!(resolution > 0, "Graph Resolution must be greater than 0");
     let dx: f32 = (end - start) / *display_properties.get_resolution() as f32;
+    // let dx: f32 = (end - start) / *display_properties.get_resolution() as f32;
 
     let mut x1 = start;
     let mut x2 = x1 + dx;
