@@ -4,6 +4,7 @@ export type ModelDisplay = {
 
 export type GraphDisplay = {
     id: string,
+    graphType: GraphType,
     structures: StructureDisplay[],
     displayProperties: GraphDisplayProperties,
 }

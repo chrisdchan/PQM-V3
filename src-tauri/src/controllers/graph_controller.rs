@@ -24,10 +24,10 @@ pub fn get_graph(state: State<AppState>, graph_id: &str) -> Result<GraphDisplay>
     graph_transformer::to_graph_display(&graph)
 }
 
-pub fn create_graph(state: State<AppState>, path_bufs: Vec<PathBuf>) -> Result<GraphDisplay> {
+pub fn create_graph(state: &State<AppState>, path_bufs: Vec<PathBuf>) -> Result<GraphDisplay> {
     let structures: Vec<Structure> = path_bufs
         .into_iter()
-        .map(create_structure)
+        .map(|path_buf| create_structure(state, path_buf))
         .collect::<Result<Vec<Structure>>>()?;
     let structures_map: HashMap<Uuid, Arc<Mutex<Structure>>> = structures
         .into_iter()

@@ -1,23 +1,13 @@
-use anyhow::{anyhow, bail, Result};
-use std::{
-    cell::{RefCell, RefMut},
-    path::{self, Path, PathBuf},
-    rc::Rc,
-    sync::{mpsc::RecvError, Arc, Mutex, PoisonError},
-    thread,
-};
-use tauri::{
-    api::dialog::{self, FileDialogBuilder},
-    State,
-};
+use std::{sync::Mutex, thread};
 
-use crate::controllers::structure_controller;
+use anyhow::Result;
+use tauri::{api::dialog::FileDialogBuilder, State};
+
 use crate::dto::api::GraphTableDisplay;
 use crate::{
     controllers::graph_controller,
     dto::{api::GraphDisplay, api_error::ResponseError},
     state::AppState,
-    transformers::structure_transformer,
 };
 
 #[tauri::command]
@@ -38,7 +28,7 @@ pub fn select_files(state: State<AppState>) -> Result<GraphDisplay, ResponseErro
     });
 
     return if let Ok(Some(path_bufs)) = reciever.recv() {
-        let graph_display = graph_controller::create_graph(state, path_bufs)?;
+        let graph_display = graph_controller::create_graph(&state, path_bufs)?;
         Ok(graph_display)
     } else {
         Err(ResponseError::new(
@@ -79,6 +69,7 @@ pub fn get_graph_table(
         Err(e) => Err(ResponseError::new(e.to_string())),
     }
 }
+
 #[tauri::command]
 pub fn export_graph_table(app_state: State<Mutex<AppState>>, graph_id: String, path: String) {
     println!("This will eventually save Graph to {}", path)
