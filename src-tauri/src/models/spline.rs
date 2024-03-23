@@ -3,8 +3,8 @@ use std::cmp::Ordering;
 use anyhow::anyhow;
 use anyhow::Result;
 use lombok::{AllArgsConstructor, Builder, Getter, Setter};
-use serde::{Deserialize, Serialize};
 use roots::{find_roots_cubic, Roots};
+use serde::{Deserialize, Serialize};
 
 #[derive(
     Serialize, PartialEq, Deserialize, Debug, Getter, Setter, AllArgsConstructor, Builder, Clone,
@@ -42,15 +42,19 @@ impl Spline {
             Roots::Three(arr) => arr.to_vec(),
             Roots::Four(arr) => arr.to_vec(),
         };
-        println!("{:?}", roots);
 
-        let roots: Vec<f32> = roots.into_iter().filter(|root| self.in_domain(*root)).collect();
+        let roots: Vec<f32> = roots
+            .into_iter()
+            .filter(|root| self.in_domain(*root))
+            .collect();
 
         if roots.len() == 1 {
             Ok(roots[0])
         } else {
             println!("{:?}", roots);
-            Err(anyhow!("There should be exactly one root in the spline domain"))
+            Err(anyhow!(
+                "There should be exactly one root in the spline domain"
+            ))
         }
     }
 

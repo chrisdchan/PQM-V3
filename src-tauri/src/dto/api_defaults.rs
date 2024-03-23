@@ -1,5 +1,7 @@
-use std::collections::HashMap;
-use super::api::{AxisDisplayProperties, AxisStyle, GraphDisplayProperties, GraphDisplayStyle, GraphType, LabelStyle, LineStyle, LineType, Margin, StructureDisplayProperties, StructureDisplayStyle, TickLineStyle, Curve};
+use super::api::{
+    AxisDisplayProperties, AxisStyle, Curve, GraphDisplayProperties, GraphDisplayStyle, LabelStyle,
+    LineStyle, LineType, Margin, StructureDisplayProperties, StructureDisplayStyle, TickLineStyle,
+};
 
 impl Default for GraphDisplayProperties {
     fn default() -> Self {
@@ -47,7 +49,10 @@ impl Default for GraphDisplayStyle {
 
 impl Default for StructureDisplayProperties {
     fn default() -> Self {
-        StructureDisplayProperties::builder().build()
+        StructureDisplayProperties::builder()
+            .resolution(100)
+            .line_type(LineType::Solid)
+            .build()
     }
 }
 
